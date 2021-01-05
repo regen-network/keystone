@@ -1,0 +1,6 @@
+version: v1beta1
+plugins:
+  - name: swift
+    out: CosmosSwift/Sources/CosmosSwift/
+  - name: swiftgrpc
+    out: CosmosSwift/Sources/CosmosSwift/
