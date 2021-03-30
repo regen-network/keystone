@@ -1,8 +1,1 @@
 version: v1beta1
-plugins:
-  - name: swift
-    out: CosmosSwift/Sources/CosmosSwift/
-    opt: FileNaming=PathToUnderscores
-  - name: grpc-swift
-    out: CosmosSwift/Sources/CosmosSwift/
-    opt: FileNaming=PathToUnderscores
