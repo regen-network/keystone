@@ -23,6 +23,8 @@
 		2A76C82D2613A4E500495A28 /* ApproveTxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A76C82B2613A4E500495A28 /* ApproveTxView.swift */; };
 		2A76C8332613A96900495A28 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A76C8322613A96900495A28 /* SettingsView.swift */; };
 		2A76C8342613A96900495A28 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A76C8322613A96900495A28 /* SettingsView.swift */; };
+		2A76C83E2613C49700495A28 /* Key.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A76C83D2613C49700495A28 /* Key.swift */; };
+		2A76C83F2613C49700495A28 /* Key.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A76C83D2613C49700495A28 /* Key.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,6 +63,7 @@
 		2A76C82026139EB500495A28 /* Tx.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tx.swift; sourceTree = "<group>"; };
 		2A76C82B2613A4E500495A28 /* ApproveTxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApproveTxView.swift; sourceTree = "<group>"; };
 		2A76C8322613A96900495A28 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		2A76C83D2613C49700495A28 /* Key.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Key.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +117,7 @@
 				2A76C7D726139CF600495A28 /* KeystoneApp.swift */,
 				2A76C7D926139CF600495A28 /* Assets.xcassets */,
 				2A76C82026139EB500495A28 /* Tx.swift */,
+				2A76C83D2613C49700495A28 /* Key.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -332,6 +336,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2A76C83E2613C49700495A28 /* Key.swift in Sources */,
 				2A76C82C2613A4E500495A28 /* ApproveTxView.swift in Sources */,
 				2A76C81926139D5500495A28 /* ListProposalsView.swift in Sources */,
 				2A76C80226139CF600495A28 /* ContentView.swift in Sources */,
@@ -345,6 +350,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2A76C83F2613C49700495A28 /* Key.swift in Sources */,
 				2A76C82D2613A4E500495A28 /* ApproveTxView.swift in Sources */,
 				2A76C81A26139D5500495A28 /* ListProposalsView.swift in Sources */,
 				2A76C80326139CF600495A28 /* ContentView.swift in Sources */,

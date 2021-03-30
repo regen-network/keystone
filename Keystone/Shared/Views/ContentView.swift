@@ -10,6 +10,12 @@ import SwiftUI
 struct ContentView: View {
     var body: some View {
         ListProposalsView()
+            .onAppear {
+                do {
+                    let key = try getOrCreateKey()
+                } catch {
+                }
+            }
     }
 }
 

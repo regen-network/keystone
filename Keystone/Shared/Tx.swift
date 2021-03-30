@@ -10,4 +10,12 @@ import Foundation
 struct TxInfo: Identifiable, Hashable {
     let summary: String
     let id = UUID()
+    
+    func approve() {
+        
+    }
+    
+    func reject() {
+        
+    }
 }
