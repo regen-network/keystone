@@ -14,9 +14,9 @@ struct SettingsView: View {
                 Label("Security", systemImage: "lock")
                 Label("Fees", systemImage: "banknote")
                 Label("Notifications", systemImage: "exclamationmark.bubble")
-                Label("Logut", systemImage: "arrow.down.left.circle")
+                Label("Deauthorize This Device", systemImage: "arrow.down.left.circle")
             }
-        }
+        }.navigationTitle("Manage Account")
     }
 }
 
