@@ -48,9 +48,9 @@
 		2A76C7D726139CF600495A28 /* KeystoneApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeystoneApp.swift; sourceTree = "<group>"; };
 		2A76C7D826139CF600495A28 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		2A76C7D926139CF600495A28 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		2A76C7DE26139CF600495A28 /* Keystone.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Keystone.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2A76C7DE26139CF600495A28 /* KeystoneAuthenticator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KeystoneAuthenticator.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A76C7E126139CF600495A28 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		2A76C7E626139CF600495A28 /* Keystone.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Keystone.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2A76C7E626139CF600495A28 /* KeystoneAuthenticator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KeystoneAuthenticator.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A76C7E826139CF600495A28 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2A76C7E926139CF600495A28 /* macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = macOS.entitlements; sourceTree = "<group>"; };
 		2A76C7EE26139CF600495A28 /* Tests iOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tests iOS.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -125,8 +125,8 @@
 		2A76C7DF26139CF600495A28 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				2A76C7DE26139CF600495A28 /* Keystone.app */,
-				2A76C7E626139CF600495A28 /* Keystone.app */,
+				2A76C7DE26139CF600495A28 /* KeystoneAuthenticator.app */,
+				2A76C7E626139CF600495A28 /* KeystoneAuthenticator.app */,
 				2A76C7EE26139CF600495A28 /* Tests iOS.xctest */,
 				2A76C7F926139CF600495A28 /* Tests macOS.xctest */,
 			);
@@ -182,9 +182,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		2A76C7DD26139CF600495A28 /* Keystone (iOS) */ = {
+		2A76C7DD26139CF600495A28 /* KeystoneAuthenticator (iOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2A76C80826139CF600495A28 /* Build configuration list for PBXNativeTarget "Keystone (iOS)" */;
+			buildConfigurationList = 2A76C80826139CF600495A28 /* Build configuration list for PBXNativeTarget "KeystoneAuthenticator (iOS)" */;
 			buildPhases = (
 				2A76C7DA26139CF600495A28 /* Sources */,
 				2A76C7DB26139CF600495A28 /* Frameworks */,
@@ -194,14 +194,14 @@
 			);
 			dependencies = (
 			);
-			name = "Keystone (iOS)";
+			name = "KeystoneAuthenticator (iOS)";
 			productName = "Keystone (iOS)";
-			productReference = 2A76C7DE26139CF600495A28 /* Keystone.app */;
+			productReference = 2A76C7DE26139CF600495A28 /* KeystoneAuthenticator.app */;
 			productType = "com.apple.product-type.application";
 		};
-		2A76C7E526139CF600495A28 /* Keystone (macOS) */ = {
+		2A76C7E526139CF600495A28 /* KeystoneAuthenticator (macOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2A76C80B26139CF600495A28 /* Build configuration list for PBXNativeTarget "Keystone (macOS)" */;
+			buildConfigurationList = 2A76C80B26139CF600495A28 /* Build configuration list for PBXNativeTarget "KeystoneAuthenticator (macOS)" */;
 			buildPhases = (
 				2A76C7E226139CF600495A28 /* Sources */,
 				2A76C7E326139CF600495A28 /* Frameworks */,
@@ -211,9 +211,9 @@
 			);
 			dependencies = (
 			);
-			name = "Keystone (macOS)";
+			name = "KeystoneAuthenticator (macOS)";
 			productName = "Keystone (macOS)";
-			productReference = 2A76C7E626139CF600495A28 /* Keystone.app */;
+			productReference = 2A76C7E626139CF600495A28 /* KeystoneAuthenticator.app */;
 			productType = "com.apple.product-type.application";
 		};
 		2A76C7ED26139CF600495A28 /* Tests iOS */ = {
@@ -277,7 +277,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 2A76C7D526139CF600495A28 /* Build configuration list for PBXProject "Keystone" */;
+			buildConfigurationList = 2A76C7D526139CF600495A28 /* Build configuration list for PBXProject "KeystoneAuthenticator" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -290,8 +290,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				2A76C7DD26139CF600495A28 /* Keystone (iOS) */,
-				2A76C7E526139CF600495A28 /* Keystone (macOS) */,
+				2A76C7DD26139CF600495A28 /* KeystoneAuthenticator (iOS) */,
+				2A76C7E526139CF600495A28 /* KeystoneAuthenticator (macOS) */,
 				2A76C7ED26139CF600495A28 /* Tests iOS */,
 				2A76C7F826139CF600495A28 /* Tests macOS */,
 			);
@@ -381,12 +381,12 @@
 /* Begin PBXTargetDependency section */
 		2A76C7F026139CF600495A28 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 2A76C7DD26139CF600495A28 /* Keystone (iOS) */;
+			target = 2A76C7DD26139CF600495A28 /* KeystoneAuthenticator (iOS) */;
 			targetProxy = 2A76C7EF26139CF600495A28 /* PBXContainerItemProxy */;
 		};
 		2A76C7FB26139CF600495A28 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 2A76C7E526139CF600495A28 /* Keystone (macOS) */;
+			target = 2A76C7E526139CF600495A28 /* KeystoneAuthenticator (macOS) */;
 			targetProxy = 2A76C7FA26139CF600495A28 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -509,7 +509,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = HNH6747329;
+				DEVELOPMENT_TEAM = 832BJ2VRM2;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = iOS/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -517,8 +517,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = network.regen.Keystone;
-				PRODUCT_NAME = Keystone;
+				PRODUCT_BUNDLE_IDENTIFIER = network.regen.KeystoneAuthenticator;
+				PRODUCT_NAME = KeystoneAuthenticator;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -531,7 +531,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = HNH6747329;
+				DEVELOPMENT_TEAM = 832BJ2VRM2;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = iOS/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -539,8 +539,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = network.regen.Keystone;
-				PRODUCT_NAME = Keystone;
+				PRODUCT_BUNDLE_IDENTIFIER = network.regen.KeystoneAuthenticator;
+				PRODUCT_NAME = KeystoneAuthenticator;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -566,7 +566,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				PRODUCT_BUNDLE_IDENTIFIER = network.regen.Keystone;
-				PRODUCT_NAME = Keystone;
+				PRODUCT_NAME = KeystoneAuthenticator;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
 			};
@@ -590,7 +590,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				PRODUCT_BUNDLE_IDENTIFIER = network.regen.Keystone;
-				PRODUCT_NAME = Keystone;
+				PRODUCT_NAME = KeystoneAuthenticator;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
 			};
@@ -688,7 +688,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		2A76C7D526139CF600495A28 /* Build configuration list for PBXProject "Keystone" */ = {
+		2A76C7D526139CF600495A28 /* Build configuration list for PBXProject "KeystoneAuthenticator" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2A76C80626139CF600495A28 /* Debug */,
@@ -697,7 +697,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2A76C80826139CF600495A28 /* Build configuration list for PBXNativeTarget "Keystone (iOS)" */ = {
+		2A76C80826139CF600495A28 /* Build configuration list for PBXNativeTarget "KeystoneAuthenticator (iOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2A76C80926139CF600495A28 /* Debug */,
@@ -706,7 +706,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2A76C80B26139CF600495A28 /* Build configuration list for PBXNativeTarget "Keystone (macOS)" */ = {
+		2A76C80B26139CF600495A28 /* Build configuration list for PBXNativeTarget "KeystoneAuthenticator (macOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2A76C80C26139CF600495A28 /* Debug */,
