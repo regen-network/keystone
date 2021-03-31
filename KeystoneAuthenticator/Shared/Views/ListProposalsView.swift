@@ -29,7 +29,7 @@ struct ListProposalsView: View {
                 }
             }.navigationBarItems(trailing: NavigationLink(destination: SettingsView()) {
                 Image(systemName: "gear")
-            })
+            }).navigationTitle("Pending Transactions")
         }
     }
 }

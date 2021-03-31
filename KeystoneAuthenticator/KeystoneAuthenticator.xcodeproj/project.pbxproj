@@ -509,6 +509,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = 832BJ2VRM2;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = iOS/Info.plist;
@@ -517,6 +518,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = network.regen.KeystoneAuthenticator;
 				PRODUCT_NAME = KeystoneAuthenticator;
 				SDKROOT = iphoneos;
@@ -531,6 +533,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = 832BJ2VRM2;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = iOS/Info.plist;
@@ -539,6 +542,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = network.regen.KeystoneAuthenticator;
 				PRODUCT_NAME = KeystoneAuthenticator;
 				SDKROOT = iphoneos;
@@ -554,6 +558,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = macOS/macOS.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = HNH6747329;
@@ -565,7 +570,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				PRODUCT_BUNDLE_IDENTIFIER = network.regen.Keystone;
+				PRODUCT_BUNDLE_IDENTIFIER = network.regen.KeystoneAuthenticator;
 				PRODUCT_NAME = KeystoneAuthenticator;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
@@ -578,6 +583,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = macOS/macOS.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = HNH6747329;
@@ -589,7 +595,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				PRODUCT_BUNDLE_IDENTIFIER = network.regen.Keystone;
+				PRODUCT_BUNDLE_IDENTIFIER = network.regen.KeystoneAuthenticator;
 				PRODUCT_NAME = KeystoneAuthenticator;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
@@ -614,7 +620,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "Keystone (iOS)";
+				TEST_TARGET_NAME = "Keystone Authenticator (iOS)";
 			};
 			name = Debug;
 		};
@@ -636,7 +642,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "Keystone (iOS)";
+				TEST_TARGET_NAME = "Keystone Authenticator (iOS)";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -659,7 +665,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
-				TEST_TARGET_NAME = "Keystone (macOS)";
+				TEST_TARGET_NAME = "Keystone Authenticator (macOS)";
 			};
 			name = Debug;
 		};
@@ -681,7 +687,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
-				TEST_TARGET_NAME = "Keystone (macOS)";
+				TEST_TARGET_NAME = "Keystone Authenticator (macOS)";
 			};
 			name = Release;
 		};
