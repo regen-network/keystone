@@ -1,0 +1,37 @@
+name: Apple
+on: # rebuild any PRs and main branch changes
+  pull_request:
+#    paths:
+#      - "KeystoneAuthenticator/**"
+  push:
+    branches:
+      - main
+#    paths:
+#      - "KeystoneAuthenticator/**"
+
+jobs:
+  build:
+    runs-on: macOS-latest
+    timeout-minutes: 30
+    environment: production
+    steps:
+      - uses: actions/checkout@v2
+      - uses: Apple-Actions/import-codesign-certs@v1
+        with:
+          p12-file-base64: ${{ secrets.CERTIFICATES_P12 }}
+          p12-password: ${{ secrets.CERTIFICATES_P12_PASSWORD }}
+      - uses: Apple-Actions/download-provisioning-profiles@v1
+        with:
+          bundle-id: network.regen.KeystoneAuthenticator
+          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+      - name: xcodebuild
+        run: |
+          xcrun xcodebuild \
+            -project KeystoneAuthenticator/KeystoneAuthenticator.xcodeproj \
+            -scheme "KeystoneAuthenticator (iOS)" \
+            -configuration Release \
+            CURRENT_PROJECT_VERSION="${GITHUB_RUN_NUMBER}" \
+            archive
+
