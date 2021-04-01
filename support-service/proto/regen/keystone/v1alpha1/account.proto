@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package regen.keystone.v1alpha1;
+
+import "google/protobuf/any.proto";
+
+option go_package = "github.com/regen-network/keystone/support-service";
+
+service AccountService {
+    rpc Bootstrap(AccountServiceBootstrapRequest) returns (AccountServiceBootstrapResponse);
+}
+
+message AccountServiceBootstrapRequest {
+    google.protobuf.Any pub_key = 1;
+}
+
+message AccountServiceBootstrapResponse {
+    string account_address = 1;
+    string key_address = 2;
+}
+
+
