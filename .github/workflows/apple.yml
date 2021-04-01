@@ -28,3 +28,5 @@ jobs:
           api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
       - name: Xcodebuild Action
         uses: sersoft-gmbh/xcodebuild-action@v1.4
+        with:
+          project: KeystoneAuthenticator
