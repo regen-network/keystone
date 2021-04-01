@@ -3,7 +3,11 @@ name: Go
 on:
   push:
     branches: [ main ]
+    paths:
+      - support-service
   pull_request:
+    paths:
+      - support-service
 
 jobs:
   build:
