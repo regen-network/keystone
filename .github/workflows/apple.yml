@@ -17,7 +17,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: xcodebuild
         run: |
-          xcrun xcodebuild -project KeystoneAuthenticator/KeystoneAuthenticator.xcodeproj
+          xcrun xcodebuild -project KeystoneAuthenticator/KeystoneAuthenticator.xcodeproj \
+                           -allowProvisioningUpdates \
                            -scheme "KeystoneAuthenticator (iOS)" build
 
   deploy:
@@ -38,6 +39,8 @@ jobs:
           api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
       - name: xcodebuild
         run: |
-          xcrun xcodebuild -project KeystoneAuthenticator/KeystoneAuthenticator.xcodeproj
-                           -scheme "KeystoneAuthenticator (iOS)" archive
+          xcrun xcodebuild \
+            -project KeystoneAuthenticator/KeystoneAuthenticator.xcodeproj \
+            CURRENT_PROJECT_VERSION="${GITHUB_RUN_NUMBER}" \
+            -scheme "KeystoneAuthenticator (iOS)" archive
 
