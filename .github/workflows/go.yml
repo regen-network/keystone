@@ -6,7 +6,6 @@ on:
     paths:
       - support-service
   pull_request:
-    branches: [ main ]
     paths:
       - support-service
 
