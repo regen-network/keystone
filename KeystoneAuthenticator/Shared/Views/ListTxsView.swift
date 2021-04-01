@@ -24,6 +24,8 @@ struct ListTxsView: View {
     @State private var navigateTo = ""
 
     @State private var inSettingsView = false
+    
+    @State private var inAddAccountView = false
 
     var body: some View {
         NavigationView {
@@ -48,7 +50,10 @@ struct ListTxsView: View {
                                         Label("Account 1", systemImage: "person").tag("1")
                                         Label("Account 2", systemImage: "person").tag("2")
                                     }
-                                    Button(action: {}) {
+                                    
+                                    Button(action: {
+                                        inAddAccountView = true
+                                    }) {
                                         Label("Add Account", systemImage: "plus")
                                     }
                                 }
@@ -58,7 +63,17 @@ struct ListTxsView: View {
                                 NavigationLink(destination: SettingsView(), isActive: $inSettingsView) {
                                     EmptyView()
                                 }
-                            )
+                            ).fullScreenCover(isPresented: $inAddAccountView) {
+                                WelcomeView().toolbar {
+                                    ToolbarItem(placement: .primaryAction) {
+                                        Button(action: {
+                                            inAddAccountView = false
+                                        }) {
+                                            Text("Cancel").fontWeight(.semibold)
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                     .navigationTitle("Pending Transactions")
