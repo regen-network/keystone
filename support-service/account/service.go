@@ -12,5 +12,5 @@ type service struct {
 var _ support_service.AccountServiceServer = service{}
 
 func (s service) Bootstrap(ctx context.Context, request *support_service.AccountServiceBootstrapRequest) (*support_service.AccountServiceBootstrapResponse, error) {
-	return nil, nil
+	panic("implement me")
 }
