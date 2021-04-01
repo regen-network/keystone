@@ -4,10 +4,10 @@ on:
   push:
     branches: [ main ]
     paths:
-      - support-service
+      - 'support-service/**'
   pull_request:
     paths:
-      - support-service
+      - 'support-service/**'
 
 jobs:
   build:
