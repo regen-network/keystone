@@ -23,7 +23,6 @@ struct WelcomeView: View {
     @State var isError = false
 
     var body: some View {
-        NavigationView {
             VStack {
                 NavigationLink(destination: VStack {
                     Picker("Select Network", selection: $selectedChain) {
@@ -56,7 +55,7 @@ struct WelcomeView: View {
                     Text("Sign-in to Existing Account")
                 }.padding(10)
             }.navigationTitle("Add Account")
-        }.fullScreenCover(isPresented: $isCreating, content: {
+            .fullScreenCover(isPresented: $isCreating, content: {
             VStack {
                 Text("Creating Account...")
                 ProgressView().progressViewStyle(CircularProgressViewStyle())
@@ -69,6 +68,8 @@ struct WelcomeView: View {
 
 struct WelcomeView_Previews: PreviewProvider {
     static var previews: some View {
-        WelcomeView()
+        NavigationView {
+            WelcomeView()
+        }
     }
 }

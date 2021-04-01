@@ -63,20 +63,23 @@ struct ListTxsView: View {
                                 NavigationLink(destination: SettingsView(), isActive: $inSettingsView) {
                                     EmptyView()
                                 }
-                            ).fullScreenCover(isPresented: $inAddAccountView) {
-                                WelcomeView().toolbar {
-                                    ToolbarItem(placement: .primaryAction) {
-                                        Button(action: {
-                                            inAddAccountView = false
-                                        }) {
-                                            Text("Cancel").fontWeight(.semibold)
-                                        }
+                            )
+                        }
+                    }
+                    .navigationTitle("Pending Transactions")
+                    .fullScreenCover(isPresented: $inAddAccountView) {
+                        NavigationView {
+                            WelcomeView().toolbar {
+                                ToolbarItem(placement: .primaryAction) {
+                                    Button(action: {
+                                        inAddAccountView = false
+                                    }) {
+                                        Text("Cancel").fontWeight(.semibold)
                                     }
                                 }
                             }
                         }
                     }
-                    .navigationTitle("Pending Transactions")
         }
     }
 }
