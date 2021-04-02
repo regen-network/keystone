@@ -8,6 +8,7 @@
 import Foundation
 import CryptoKit
 import Security
+import CoreData
 
 
 let CurrentAccountKey = "currentAccount"
@@ -16,27 +17,38 @@ func getCurrentAccount() -> String? {
     UserDefaults.standard.string(forKey: CurrentAccountKey)
 }
 
-func setCurrentAccount(account: String) {
-    UserDefaults.standard.setValue(account, forKeyPath: CurrentAccountKey)
+func setCurrentAccount(account: Account) {
+    UserDefaults.standard.setValue(account.objectID.uriRepresentation().absoluteString, forKeyPath: CurrentAccountKey)
 }
 
 enum AccountError : Error {
     case keychainAdd
+    case save
 }
 
-func createAccount(name: String, chainId: String) throws {
+func createAccount(name: String, chainId: String, moc: NSManagedObjectContext) throws {
     // create new private key
-    let privKey = try SecureEnclave.P256.Signing.PrivateKey()
+    //let privKey = try SecureEnclave.P256.Signing.PrivateKey()
     // store priv key in keychain under account name
-    let query: [String: Any] = [kSecClass as String: kSecClassKey,
-                                kSecAttrLabel as String: name,
-                                kSecAttrApplicationLabel as String: chainId,
-                                kSecValueData as String: privKey.dataRepresentation]
+//    let query: [String: Any] = [kSecClass as String: kSecClassKey,
+//                                kSecAttrLabel as String: name,
+//                                kSecAttrApplicationLabel as String: chainId,
+//                                kSecValueData as String: privKey.dataRepresentation]
+//
+//    let status = SecItemAdd(query as CFDictionary, nil)
+//    guard status == errSecSuccess else { throw AccountError.keychainAdd }
     
-    let status = SecItemAdd(query as CFDictionary, nil)
-    guard status == errSecSuccess else { throw AccountError.keychainAdd }
+    let account = Account(context: moc)
+    account.name = name
+    account.chainId = chainId
     
-    setCurrentAccount(account: name)
+    do {
+        try moc.save()
+    } catch {
+        throw AccountError.save
+    }
+    
+    setCurrentAccount(account: account)
 }
 
 func getAccounts() {

@@ -27,6 +27,12 @@
 		2A76C8342613A96900495A28 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A76C8322613A96900495A28 /* SettingsView.swift */; };
 		2A76C83E2613C49700495A28 /* Key.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A76C83D2613C49700495A28 /* Key.swift */; };
 		2A76C83F2613C49700495A28 /* Key.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A76C83D2613C49700495A28 /* Key.swift */; };
+		2AF6FEF72616955D00E6576C /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 2AF6FEF52616955D00E6576C /* Model.xcdatamodeld */; };
+		2AF6FEF82616955D00E6576C /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 2AF6FEF52616955D00E6576C /* Model.xcdatamodeld */; };
+		2AF6FF022616962A00E6576C /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AF6FF012616962A00E6576C /* PersistenceController.swift */; };
+		2AF6FF032616962A00E6576C /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AF6FF012616962A00E6576C /* PersistenceController.swift */; };
+		2AF6FF0926169E6000E6576C /* AccountSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AF6FF0826169E6000E6576C /* AccountSelector.swift */; };
+		2AF6FF0A26169E6000E6576C /* AccountSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AF6FF0826169E6000E6576C /* AccountSelector.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,6 +73,9 @@
 		2A76C82B2613A4E500495A28 /* ApproveTxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApproveTxView.swift; sourceTree = "<group>"; };
 		2A76C8322613A96900495A28 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		2A76C83D2613C49700495A28 /* Key.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Key.swift; sourceTree = "<group>"; };
+		2AF6FEF62616955D00E6576C /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
+		2AF6FF012616962A00E6576C /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
+		2AF6FF0826169E6000E6576C /* AccountSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSelector.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,11 +125,13 @@
 		2A76C7D626139CF600495A28 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				2AF6FEF52616955D00E6576C /* Model.xcdatamodeld */,
 				2A76C81F26139E5400495A28 /* Views */,
 				2A76C7D726139CF600495A28 /* KeystoneApp.swift */,
 				2A76C7D926139CF600495A28 /* Assets.xcassets */,
 				2A76C82026139EB500495A28 /* Tx.swift */,
 				2A76C83D2613C49700495A28 /* Key.swift */,
+				2AF6FF012616962A00E6576C /* PersistenceController.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -179,6 +190,7 @@
 				2A76C82B2613A4E500495A28 /* ApproveTxView.swift */,
 				2A76C8322613A96900495A28 /* SettingsView.swift */,
 				2A3345D62615237E00DFDAC8 /* WelcomeView.swift */,
+				2AF6FF0826169E6000E6576C /* AccountSelector.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -342,12 +354,15 @@
 			files = (
 				2A76C83E2613C49700495A28 /* Key.swift in Sources */,
 				2A76C82C2613A4E500495A28 /* ApproveTxView.swift in Sources */,
+				2AF6FF0926169E6000E6576C /* AccountSelector.swift in Sources */,
 				2A76C81926139D5500495A28 /* ListTxsView.swift in Sources */,
 				2A3345D72615237E00DFDAC8 /* WelcomeView.swift in Sources */,
 				2A76C80226139CF600495A28 /* ContentView.swift in Sources */,
+				2AF6FEF72616955D00E6576C /* Model.xcdatamodeld in Sources */,
 				2A76C8332613A96900495A28 /* SettingsView.swift in Sources */,
 				2A76C80026139CF600495A28 /* KeystoneApp.swift in Sources */,
 				2A76C82126139EB500495A28 /* Tx.swift in Sources */,
+				2AF6FF022616962A00E6576C /* PersistenceController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -357,12 +372,15 @@
 			files = (
 				2A76C83F2613C49700495A28 /* Key.swift in Sources */,
 				2A76C82D2613A4E500495A28 /* ApproveTxView.swift in Sources */,
+				2AF6FF0A26169E6000E6576C /* AccountSelector.swift in Sources */,
 				2A76C81A26139D5500495A28 /* ListTxsView.swift in Sources */,
 				2A3345D82615237E00DFDAC8 /* WelcomeView.swift in Sources */,
 				2A76C80326139CF600495A28 /* ContentView.swift in Sources */,
+				2AF6FEF82616955D00E6576C /* Model.xcdatamodeld in Sources */,
 				2A76C8342613A96900495A28 /* SettingsView.swift in Sources */,
 				2A76C80126139CF600495A28 /* KeystoneApp.swift in Sources */,
 				2A76C82226139EB500495A28 /* Tx.swift in Sources */,
+				2AF6FF032616962A00E6576C /* PersistenceController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -515,7 +533,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = 832BJ2VRM2;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = iOS/Info.plist;
@@ -539,7 +557,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = 832BJ2VRM2;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = iOS/Info.plist;
@@ -746,6 +764,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		2AF6FEF52616955D00E6576C /* Model.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				2AF6FEF62616955D00E6576C /* Model.xcdatamodel */,
+			);
+			currentVersion = 2AF6FEF62616955D00E6576C /* Model.xcdatamodel */;
+			path = Model.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 2A76C7D226139CF600495A28 /* Project object */;
 }
