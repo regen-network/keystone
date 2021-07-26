@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package keystone.v1alpha1;
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/any.proto";
+
+message RegistrationRequest {
+	string body = 1;
+}
+
+message RegistrationResponse {
+	string status = 1 ;
+}
+
+message SignRequest {
+	string body = 1;
+}
+
+message SignResponse {
+	string status = 1 ;
+}
+
+message SignedRequest {
+	string body = 1;
+}
+
+message VerifyResponse {
+	string status = 1 ;
+}
+
+service KeystoneService {
+  rpc Register(RegistrationRequest) returns (RegistrationResponse) ;
+  rpc Sign(SignRequest) returns (SignResponse) ;
+  rpc Verify(SignedRequest) returns (VerifyResponse) ;
+}
