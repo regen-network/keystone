@@ -1,15 +1,15 @@
 INSTALL_DIR="$(shell go env GOPATH)/bin"
 
 # build is first target so that lone 'make' calls 'make build'
-build: ./keystoned
+build: proto *.go ./keystoned 
 	go build .
 
 install: ./keystoned
 	cp keystoned $(INSTALL_DIR)
 
-proto: proto/keystone.proto proto/keystone.pb.go
+proto: proto/keystone.pb.go
 
-proto/keystone.pb.go:
+proto/keystone.pb.go: proto/keystone.proto
 	protoc --go_out=plugins=grpc:. ./proto/*.proto
 
 clean:
