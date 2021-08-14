@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package register;
+option go_package = "./proto";
+
+message registerRequest {
+    string name = 1;
+    bytes encryptedKey = 2 ;
+}
+
+message registerResponse {
+    string greeting = 1;
+    int32 status = 2;
+}
+
+message signRequest {
+    bytes forSigning = 1;
+}
+
+message signResponse {
+    int32 status = 1 ;
+    bytes signedBytes = 2;
+}
+
+service keystoneService {
+    rpc Register(registerRequest) returns (registerResponse) {};
+    rpc Sign(signRequest) returns (signResponse) {};
+}
