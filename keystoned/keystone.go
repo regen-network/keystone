@@ -35,11 +35,34 @@ const (
 
 type server struct{}
 
+func createAddress() (address string){
+	return MY_ADDRESS
+}
+
 func (s *server) Register(ctx context.Context, in *keystonepb.RegisterRequest) (*keystonepb.RegisterResponse, error) {
-	log.Printf("Receive message body from client: %s %v", in.Name, in.EncryptedKey)
+	log.Printf("Receive message body from client: %s %v", in.Address, in.EncryptedKey)
 
-	addr1, err := sdk.AccAddressFromBech32(MY_ADDRESS)
+	var addr1 sdk.AccAddress = nil
+	var err error
+	
+	if len(in.Address) > 0 {
+		log.Printf("Address passed in request")
+		addr1, err = sdk.AccAddressFromBech32(in.Address)
 
+		if err != nil {
+			log.Println("Address conversion from bech32 failed")
+			return nil, err
+		}
+	} else {
+		
+		addr1, err = sdk.AccAddressFromBech32(createAddress())
+		
+		if err != nil {
+			log.Println("Address conversion from bech32 failed")
+			return nil, err
+		}
+	}	
+	
 	metadata := "some metadata"
 
 	b := make([]byte, b64.StdEncoding.EncodedLen(len(metadata)))
@@ -123,6 +146,9 @@ func getLocalContext() (*client.Context, error) {
 	return &c, nil
 }
 
+// something like this to abstract the tx building for multiple messages -- func createTx( txcfg params.EncodingConfig,
+
+// CreateGroup creates a Cosmos Group using the MsgCreateGroup, filling the message with the input fields
 func CreateGroup(creatorAddress []byte, memberList []group.Member, metadata string, localContext *client.Context) ([]byte, error) {
 
 	encCfg := makeEncodingConfig()

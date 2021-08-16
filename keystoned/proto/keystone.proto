@@ -4,7 +4,7 @@ package register;
 option go_package = "./proto";
 
 message registerRequest {
-    string name = 1;
+    string address = 1;
     bytes encryptedKey = 2 ;
 }
 
