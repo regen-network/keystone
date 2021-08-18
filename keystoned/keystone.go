@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
-	b64 "encoding/base64"
 	"fmt"
 	"log"
 	"net"
 	"strconv"
+	"flag"
 
 	"google.golang.org/grpc"
 
@@ -33,17 +33,47 @@ const (
 	MY_RPC_URI         = "tcp://localhost:26657"
 )
 
-type server struct{}
+type server struct{
+	ServerAddress    string
+	ChainID          string
+	KeyringType      string
+	KeyringDir       string
+	RpcURI           string
+}
 
-func createAddress() (address string){
+// address will eventually create a keypair (in an HSM via the
+// key/keyring struct) and then create the address, derived from the
+// public key in the usual way
+func address() (address string){
 	return MY_ADDRESS
 }
 
+//adminMembers returns a []group.Member with two members
+func adminMembers( addr1 string, addr2 string ) []group.Member{
+	
+	member1 := group.Member{
+		Address:  addr1,
+		Weight:   strconv.Itoa(1),
+	}
+
+	member2 := group.Member{
+		Address:  addr2,
+		Weight:   strconv.Itoa(1),
+	}
+	
+	return []group.Member{member1, member2}
+}
+
+// Register implements the method given in the protobuf definition for
+// the Keystone service (proto/keystone.proto)
 func (s *server) Register(ctx context.Context, in *keystonepb.RegisterRequest) (*keystonepb.RegisterResponse, error) {
 	log.Printf("Receive message body from client: %s %v", in.Address, in.EncryptedKey)
 
 	var addr1 sdk.AccAddress = nil
 	var err error
+
+	// If an address is passed in via the request, then use that address
+	// to create the group, otherwise create a new address for the group
 	
 	if len(in.Address) > 0 {
 		log.Printf("Address passed in request")
@@ -55,7 +85,7 @@ func (s *server) Register(ctx context.Context, in *keystonepb.RegisterRequest) (
 		}
 	} else {
 		
-		addr1, err = sdk.AccAddressFromBech32(createAddress())
+		addr1, err = sdk.AccAddressFromBech32(s.ServerAddress)
 		
 		if err != nil {
 			log.Println("Address conversion from bech32 failed")
@@ -63,20 +93,7 @@ func (s *server) Register(ctx context.Context, in *keystonepb.RegisterRequest) (
 		}
 	}	
 	
-	metadata := "some metadata"
-
-	b := make([]byte, b64.StdEncoding.EncodedLen(len(metadata)))
-	b64.StdEncoding.Encode(b, []byte(metadata))
-
-	member1 := group.Member{
-		Address:  addr1.String(),
-		Weight:   strconv.Itoa(1),
-		Metadata: b,
-	}
-
-	members := []group.Member{member1}
-
-	localContext, err := getLocalContext()
+	localContext, err := getLocalContext(s)
 
 	if err != nil {
 		fmt.Println("Error getting local node context: ", err)
@@ -86,7 +103,7 @@ func (s *server) Register(ctx context.Context, in *keystonepb.RegisterRequest) (
 	// @@todo: create key/address and use that as creator address
 	// may need to first create a key/address if one not sent in request
 	// as "from" address (creator) must already exist
-	groupAddress, err := CreateGroup([]byte(MY_ADDRESS), members, "", localContext)
+	groupAddress, err := createGroup([]byte(addr1.String()), adminMembers(addr1.String(), addr1.String()), "", localContext)
 
 	if err != nil {
 		fmt.Println("Error creating group: ", err)
@@ -105,22 +122,23 @@ func (s *server) Sign(ctx context.Context, in *keystonepb.SignRequest) (*keyston
 // go relayer/block explorer examples?
 
 // how to retrieve node context beyond this one transaction?
-func getLocalContext() (*client.Context, error) {
+func getLocalContext(s server) (*client.Context, error) {
 
-	addr, err := sdk.AccAddressFromBech32(MY_ADDRESS)
+	addr, err := sdk.AccAddressFromBech32(s.ServerAddress)
 	encodingConfig := makeEncodingConfig()
 
 	if err != nil {
 		return nil, err
 	}
 
-	rpcclient, err := client.NewClientFromNode(MY_RPC_URI)
+	rpcclient, err := client.NewClientFromNode(S.RpcURI)
 
 	if err != nil {
 		return nil, err
 	}
 
-	k, err := keyring.New(sdk.KeyringServiceName(), keyring.BackendTest, MY_KEYRING_DIR, nil)
+	//@@TODO configure keyring.BackendTest using the server-global context, not hardcode
+	k, err := keyring.New(sdk.KeyringServiceName(), keyring.BackendTest, s.KeyringDir, nil)
 
 	// l, err := k.List()
 
@@ -131,32 +149,36 @@ func getLocalContext() (*client.Context, error) {
 		return nil, err
 	}
 
-	c := client.Context{FromAddress: addr, ChainID: MY_CHAIN}.
+	c := client.Context{FromAddress: addr, ChainID: s.ChainID}.
 		WithCodec(encodingConfig.Marshaler).
 		WithInterfaceRegistry(encodingConfig.InterfaceRegistry).
 		WithTxConfig(encodingConfig.TxConfig).
 		WithLegacyAmino(encodingConfig.Amino).
 		WithBroadcastMode(flags.BroadcastSync).
-		WithNodeURI(MY_RPC_URI).
+		WithNodeURI(s.RpcURI).
 		WithAccountRetriever(acc.AccountRetriever{}).
 		WithClient(rpcclient).
-		WithKeyringDir(MY_KEYRING_DIR).
+		WithKeyringDir(S.KeyringDir).
 		WithKeyring(k)
 
 	return &c, nil
 }
 
+func createAdminGroup(creatorAddress []byte, memberList []group.Member, metadata string, localContext *client.Context) ([]byte, error) {
+	return createGroup( creatorAddress, memberList, metadata, localContext )
+}
+	
 // something like this to abstract the tx building for multiple messages -- func createTx( txcfg params.EncodingConfig,
 
 // CreateGroup creates a Cosmos Group using the MsgCreateGroup, filling the message with the input fields
-func CreateGroup(creatorAddress []byte, memberList []group.Member, metadata string, localContext *client.Context) ([]byte, error) {
+func createGroup(creatorAddress []byte, memberList []group.Member, metadata string, localContext *client.Context) ([]byte, error) {
 
 	encCfg := makeEncodingConfig()
 	txBuilder := encCfg.TxConfig.NewTxBuilder()
 
 	// @@todo, how to get the private key from the keyring
 	// associated with this address?
-	adminAddr, err := sdk.AccAddressFromBech32(MY_ADDRESS)
+	adminAddr, err := sdk.AccAddressFromBech32(creatorAddress)
 
 	if err != nil {
 		fmt.Printf("Error converting address string: ", err)
@@ -195,7 +217,7 @@ func CreateGroup(creatorAddress []byte, memberList []group.Member, metadata stri
 		WithKeybase(localContext.Keyring).
 		WithTxConfig(encCfg.TxConfig)
 
-	// Only needed for "offline" accounts
+	// Only needed for "offline" accounts?
 	//.WithAccountNumber(num).WithSequence(seq)
 
 	info, err := txFactory.Keybase().Key("delegator")
@@ -255,8 +277,10 @@ func CreateGroup(creatorAddress []byte, memberList []group.Member, metadata stri
 
 	//res, err := localContext.BroadcastTx(txBytes)
 
+	// @@TODO: use secure connection?
 	opts := grpc.WithInsecure()
 
+	// @@TODO: configure the dial location from server context
 	grpcConn, err := grpc.Dial("127.0.0.1:9090", opts)
 
 	if err != nil {
@@ -266,13 +290,15 @@ func CreateGroup(creatorAddress []byte, memberList []group.Member, metadata stri
 
 	defer grpcConn.Close()
 
+	// @@TODO: configure broadcast mode from server-global context?
+	
 	txClient := tx.NewServiceClient(grpcConn)
-	// We then call the BroadcastTx method on this client.
+
 	res, err := txClient.BroadcastTx(
 		context.Background(),
 		&tx.BroadcastTxRequest{
 			Mode:    tx.BroadcastMode_BROADCAST_MODE_SYNC,
-			TxBytes: txBytes, // Proto-binary of the signed transaction, see previous step.
+			TxBytes: txBytes,
 		},
 	)
 
@@ -293,41 +319,41 @@ func CreateGroup(creatorAddress []byte, memberList []group.Member, metadata stri
 
 func main() {
 
-	lis, err := net.Listen("tcp", ":8080")
+	// Retrieve the command line parameters passed in to configure the server
+	// Most have likely-reasonable defaults.
+	keystoneAddress := flag.String("key-addr", "", "the address associated with the key used to sign transactions on behalf of Keystone")
+	blockchain := flag.String("chain-id", "test-chain", "the blockchain that Keystone should connect to")
+	keyringType := flag.String("keyring-type", "test", "the keyring backend type where keys should be read from")
+	keyringDir := flag.String("keyring-dir", "~/.regen/", "the directory where the keys are")
+	chainRpcURI := flag.String("chain-rpc", "tcp://localhost:26657", "the address of the RPC endpoint to communicate with the blockchain")
+	grpcListenPort := flag.String("listen-port", "8080", "the port where the server will listen for connections")
+
+	flag.Parse()
+
+	if len(*keystoneAddress) <= 0 {
+		log.Fatalln("Keystone server blockchain address may not be left empty")
+		return
+	}
+
+	lis, err := net.Listen("tcp", ":" + *grpcListenPort)
 
 	if err != nil {
 		log.Fatalln("Failed to listen:", err)
 	}
 
-	// Create a gRPC server object
+	// Create new server context, used for passing server-global state
+	ss := server{
+		ServerAddress: *keystoneAddress,
+		ChainID: *blockchain,
+		KeyringType: *keyringType,
+		KeyringDir: *keyringDir,
+		RpcURI: *chainRpcURI,
+	}
+	
 	s := grpc.NewServer()
-
-	keystonepb.RegisterKeystoneServiceServer(s, &server{})
+	keystonepb.RegisterKeystoneServiceServer(s, &ss)
 
 	s.Serve(lis)
-
-	// Generate the signing payload
-	// signerData := authsign.SignerData{
-	// 	ChainID:       "regen-network-devnet-5",
-	// 	AccountNumber: 2,
-	// 	Sequence:      2,
-	// }
-	// signBytes, err := suite.clientCtx.TxConfig.SignModeHandler().GetSignBytes(signing.SignMode_SIGN_MODE_DIRECT, signerData, tx.GetTx())
-	// suite.txBuilder.GetTx()
-	// Sign the signBytes
-	// setup txFactory
-	// txFactory := tx.Factory{}.
-	// 	WithChainID(suite.ClientCtx.ChainID).
-	// 	WithKeybase(suite.ClientCtx.Keyring).
-	// 	WithTxConfig(suite.ClientCtx.TxConfig).
-	// 	WithSignMode(signing.SignMode_SIGN_MODE_DIRECT)
-	// Sign Tx.
-	//err := client.SignTx(txFactory, val.ClientCtx, val.Moniker, suite.txBuilder, false, true)
-	// Build the TxRaw bytes.
-	//bz, err := suite.clientCtx.TxConfig.TxEncoder()(suite.txBuilder)
-	// Broadcast Tx.
-	//res, err := suite.clientCtx.BroadcastTx(bz)
-
 	return
 
 }
