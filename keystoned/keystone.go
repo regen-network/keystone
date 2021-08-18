@@ -93,7 +93,7 @@ func (s *server) Register(ctx context.Context, in *keystonepb.RegisterRequest) (
 		}
 	}	
 	
-	localContext, err := getLocalContext(s)
+	localContext, err := getLocalContext(*s)
 
 	if err != nil {
 		fmt.Println("Error getting local node context: ", err)
@@ -131,7 +131,7 @@ func getLocalContext(s server) (*client.Context, error) {
 		return nil, err
 	}
 
-	rpcclient, err := client.NewClientFromNode(S.RpcURI)
+	rpcclient, err := client.NewClientFromNode(s.RpcURI)
 
 	if err != nil {
 		return nil, err
@@ -158,7 +158,7 @@ func getLocalContext(s server) (*client.Context, error) {
 		WithNodeURI(s.RpcURI).
 		WithAccountRetriever(acc.AccountRetriever{}).
 		WithClient(rpcclient).
-		WithKeyringDir(S.KeyringDir).
+		WithKeyringDir(s.KeyringDir).
 		WithKeyring(k)
 
 	return &c, nil
@@ -178,7 +178,7 @@ func createGroup(creatorAddress []byte, memberList []group.Member, metadata stri
 
 	// @@todo, how to get the private key from the keyring
 	// associated with this address?
-	adminAddr, err := sdk.AccAddressFromBech32(creatorAddress)
+	adminAddr, err := sdk.AccAddressFromBech32(string(creatorAddress))
 
 	if err != nil {
 		fmt.Printf("Error converting address string: ", err)

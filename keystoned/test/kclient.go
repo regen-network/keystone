@@ -26,7 +26,7 @@ func main() {
 
 	client := keystonepb.NewKeystoneServiceClient(cc)
 
-	request := &keystonepb.RegisterRequest{Address: "regen19m2337xhcdd9ylwsxklcdeyanf25p6h266dd9m"}
+	request := &keystonepb.RegisterRequest{Address: "regen1fyccfg8ylh79ey2qdtx677k568mn0q3pnkajfk"}
 
 	resp, _ := client.Register(context.Background(), request)
 	
