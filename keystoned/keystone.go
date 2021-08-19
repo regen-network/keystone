@@ -24,28 +24,12 @@ import (
 	keystonepb "github.com/regen-network/keystone/keystoned/proto"
 )
 
-const (
-	//MY_ADDRESS = "regen1m0nxnyeq6ywy7hzlrvncytr4c5x5css3mhhxme" // delegator - signing fails
-	MY_ADDRESS         = "regen19m2337xhcdd9ylwsxklcdeyanf25p6h266dd9m" // validator
-	MY_CHAIN           = "test"
-	MY_KEYRING_BACKEND = "test"
-	MY_KEYRING_DIR     = "/Users/frumiousj/.regen/"
-	MY_RPC_URI         = "tcp://localhost:26657"
-)
-
 type server struct{
 	ServerAddress    string
 	ChainID          string
 	KeyringType      string
 	KeyringDir       string
 	RpcURI           string
-}
-
-// address will eventually create a keypair (in an HSM via the
-// key/keyring struct) and then create the address, derived from the
-// public key in the usual way
-func address() (address string){
-	return MY_ADDRESS
 }
 
 //adminMembers returns a []group.Member with two members
