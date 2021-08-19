@@ -11,7 +11,9 @@ replace github.com/regen-network/regen-ledger/orm => github.com/regen-network/re
 replace github.com/regen-network/regen-ledger/types => github.com/regen-network/regen-ledger/types v0.0.0-20210804173213-3265a868bf83
 
 require (
+	github.com/ThalesIgnite/crypto11 v1.2.4 // indirect
 	github.com/cosmos/cosmos-sdk v0.43.0-rc0
+	github.com/regen-network/keystone/keystoned/keys v0.0.0-20210819152304-1e66693498c6 // indirect
 	github.com/regen-network/regen-ledger/x/group v0.0.0-20210804173213-3265a868bf83
 	golang.org/x/net v0.0.0-20210726213435-c6fcb2dbf985 // indirect
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
