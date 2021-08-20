@@ -690,8 +690,10 @@ github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0 h1:MkV+77GLUNo
 github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
 github.com/regen-network/cosmos-proto v0.3.1 h1:rV7iM4SSFAagvy8RiyhiACbWEGotmqzywPxOvwMdxcg=
 github.com/regen-network/cosmos-proto v0.3.1/go.mod h1:jO0sVX6a1B36nmE8C9xBFXpNwWejXC7QqCOnH3O0+YM=
-github.com/regen-network/keystone/keystoned/keys v0.0.0-20210819152304-1e66693498c6 h1:S2C1ZJA0TkNd+5aN8GZukt89Y0uC9XHTHRnK4N+sAHE=
-github.com/regen-network/keystone/keystoned/keys v0.0.0-20210819152304-1e66693498c6/go.mod h1:0Y7yrSpieCP02qf9kAa3Jn34TnaUTU+lN9bC+yVlLBs=
+github.com/regen-network/keystone/keystoned/keys v0.0.0-20210820182155-3c88593bbd68 h1:GovO+081FDHRJPk+1BsKvq5Cc9NeqLGFR/VZZq5BfNM=
+github.com/regen-network/keystone/keystoned/keys v0.0.0-20210820182155-3c88593bbd68/go.mod h1:0Y7yrSpieCP02qf9kAa3Jn34TnaUTU+lN9bC+yVlLBs=
+github.com/regen-network/keystone/keystoned/keys v0.0.0-20210820193158-bb7e7e4e8e44 h1:SR8Lg55hIAkIp77EAIgO15FOuuwBYJxsqgeCw1vRxZo=
+github.com/regen-network/keystone/keystoned/keys v0.0.0-20210820193158-bb7e7e4e8e44/go.mod h1:0Y7yrSpieCP02qf9kAa3Jn34TnaUTU+lN9bC+yVlLBs=
 github.com/regen-network/protobuf v1.3.3-alpha.regen.1 h1:OHEc+q5iIAXpqiqFKeLpu5NwTIkVXUs48vFMwzqpqY4=
 github.com/regen-network/protobuf v1.3.3-alpha.regen.1/go.mod h1:2DjTFR1HhMQhiWC5sZ4OhQ3+NtdbZ6oBDKQwq5Ou+FI=
 github.com/regen-network/regen-ledger/orm v0.0.0-20210804173213-3265a868bf83 h1:AGQjd32AU0aSFpPIm2nYvJaf/HR+Zbqx4Y+1aUKIAXU=
@@ -798,7 +800,6 @@ github.com/tendermint/tendermint v0.34.0-rc4/go.mod h1:yotsojf2C1QBOw4dZrTcxbyxm
 github.com/tendermint/tendermint v0.34.0-rc6/go.mod h1:ugzyZO5foutZImv0Iyx/gOFCX6mjJTgbLHTwi17VDVg=
 github.com/tendermint/tendermint v0.34.0/go.mod h1:Aj3PIipBFSNO21r+Lq3TtzQ+uKESxkbA3yo/INM4QwQ=
 github.com/tendermint/tendermint v0.34.10/go.mod h1:aeHL7alPh4uTBIJQ8mgFEE8VwJLXI1VD3rVOmH2Mcy0=
-github.com/tendermint/tendermint v0.34.11 h1:q1Yh76oG4QbS07xhmIJh5iAE0fYpJ8P8YKYtjnWfJRY=
 github.com/tendermint/tendermint v0.34.11/go.mod h1:aeHL7alPh4uTBIJQ8mgFEE8VwJLXI1VD3rVOmH2Mcy0=
 github.com/tendermint/tendermint v0.34.12 h1:m+kUYNhONedhJfHmHG8lqsdZvbR5t6vmhaok1yXjpKg=
 github.com/tendermint/tendermint v0.34.12/go.mod h1:aeHL7alPh4uTBIJQ8mgFEE8VwJLXI1VD3rVOmH2Mcy0=
