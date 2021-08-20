@@ -48,7 +48,7 @@ func NewPkcs11FromConfig(configPath string) (Pkcs11Keyring, error) {
 		return Pkcs11Keyring{}, err
 	}
 
-	ctx, err := crypto11.Configure( cfg )
+	kr.ctx, err = crypto11.Configure( cfg )
 
 	if err != nil {
 		log.Printf("Slot configuration failed with %s", err.Error())
@@ -56,12 +56,15 @@ func NewPkcs11FromConfig(configPath string) (Pkcs11Keyring, error) {
 	}
 	
 	defer func() {
-		err = ctx.Close()
+		err = kr.ctx.Close()
 	}()
 	
 	kr.ModulePath = cfg.Path
 	kr.TokenLabel = cfg.TokenLabel
 
+	log.Printf("Keyring: %v", kr)
+	log.Printf("Context: %v", kr.ctx)
+	
 	return kr, nil
 }
 
