@@ -43,16 +43,26 @@ func (ring Pkcs11Keyring) NewKey(algorithm KeygenAlgorithm, label string) (Crypt
 		return CryptoKey{}, err
 	}
 
+	var key crypto11.Signer
+	
 	switch algorithm {
 	case KEYGEN_SECP256R1:
-		ring.ctx.GenerateECDSAKeyPairWithLabel(id, []byte(label), elliptic.P256())
+		key, err = ring.ctx.GenerateECDSAKeyPairWithLabel(id, []byte(label), elliptic.P256())
 	case KEYGEN_RSA:
-		ring.ctx.GenerateRSAKeyPairWithLabel(id, []byte(label), 2048)
+		key, err = ring.ctx.GenerateRSAKeyPairWithLabel(id, []byte(label), 2048)
 	default:
 		return CryptoKey{}, err
 	}
+
+	if err != nil {
+		log.Printf("Error generating key: %s", err.Error())
+		return CryptoKey{}, err
+	} else {
+		log.Printf("Key made: %v", key)
+	}
+
 	
-	return CryptoKey{Label: label, Algo: algorithm}, nil
+	return CryptoKey{Label: label, Algo: algorithm, signer: key}, nil
 }
 
 func NewPkcs11FromConfig(configPath string) (Pkcs11Keyring, error) {

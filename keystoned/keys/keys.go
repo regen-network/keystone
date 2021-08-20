@@ -2,7 +2,7 @@ package keys
 
 import (
 	tmcrypto "github.com/tendermint/tendermint/crypto"
-	//"github.com/ThalesIgnite/crypto11"
+	"github.com/ThalesIgnite/crypto11"
 )
 
 const (
@@ -18,6 +18,7 @@ type CryptoKey struct {
 	Label      string
 	Algo       KeygenAlgorithm
 	pubKey     PubKey
+	signer     crypto11.Signer
 }
 
 // CryptoPrivKey looks exactly the same as the LedgerPrivKey
