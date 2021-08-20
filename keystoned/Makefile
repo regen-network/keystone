@@ -1,7 +1,7 @@
 INSTALL_DIR="$(shell go env GOPATH)/bin"
 
 # build is first target so that lone 'make' calls 'make build'
-build: proto *.go ./keystoned 
+build: proto *.go
 	go build .
 
 install: ./keystoned
