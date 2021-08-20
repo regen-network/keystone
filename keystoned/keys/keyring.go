@@ -5,6 +5,7 @@ import (
 	"log"
 	"encoding/json"
 	"crypto/rand"
+	"crypto/elliptic"
 	
 	"github.com/ThalesIgnite/crypto11"
 )
@@ -16,6 +17,13 @@ type Pkcs11Keyring struct {
 	ctx *crypto11.Context
 }
 
+// Keyring interface provides the methods for keyring
+// implementations.
+// NewKey generates a new key, using the given keygen algorithm
+// supported algorithms are in keys.go
+// Key returns a filled out key with the given label, retrieved from the
+// keyring
+// ListKeys lists all of the keys on the keyring
 type Keyring interface {
 	NewKey( algorithm KeygenAlgorithm, label string ) (CryptoKey, error)
 	Key( label string ) (CryptoKey, error)
@@ -26,16 +34,25 @@ type Keyring interface {
 // using the given algorithm from the keygen algos supported. A label
 // can be passed in. This is used as a way of uniquely identifying the key
 // and typically is a large (unguessable) random number
-func (ring Pkcs11Keyring) NewKey(algorithm KeygenAlgorithm, label string) (CryptoKey) {
-	id, err := randomBytes(10)
+func (ring Pkcs11Keyring) NewKey(algorithm KeygenAlgorithm, label string) (CryptoKey, error) {
+
+	id, err := randomBytes(16)
 
 	if err != nil {
 		log.Printf("Error making key ID: %s", err.Error())
-		return CryptoKey{}
+		return CryptoKey{}, err
+	}
+
+	switch algorithm {
+	case KEYGEN_SECP256R1:
+		ring.ctx.GenerateECDSAKeyPairWithLabel(id, []byte(label), elliptic.P256())
+	case KEYGEN_RSA:
+		ring.ctx.GenerateRSAKeyPairWithLabel(id, []byte(label), 2048)
+	default:
+		return CryptoKey{}, err
 	}
 	
-	ring.ctx.GenerateRSAKeyPair(id, 2048)
-	return CryptoKey{Label: label, Algo: algorithm}
+	return CryptoKey{Label: label, Algo: algorithm}, nil
 }
 
 func NewPkcs11FromConfig(configPath string) (Pkcs11Keyring, error) {
@@ -62,9 +79,6 @@ func NewPkcs11FromConfig(configPath string) (Pkcs11Keyring, error) {
 	kr.ModulePath = cfg.Path
 	kr.TokenLabel = cfg.TokenLabel
 
-	log.Printf("Keyring: %v", kr)
-	log.Printf("Context: %v", kr.ctx)
-	
 	return kr, nil
 }
 
