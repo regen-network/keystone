@@ -6,3 +6,5 @@ require (
 	github.com/ThalesIgnite/crypto11 v1.2.4
 	github.com/tendermint/tendermint v0.34.12
 )
+
+replace github.com/ThalesIgnite/crypto11 => /home/johnk/src/crypto11
