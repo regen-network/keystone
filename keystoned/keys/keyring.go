@@ -82,10 +82,6 @@ func NewPkcs11FromConfig(configPath string) (Pkcs11Keyring, error) {
 		return Pkcs11Keyring{}, err
 	}
 	
-	defer func() {
-		err = kr.ctx.Close()
-	}()
-	
 	kr.ModulePath = cfg.Path
 	kr.TokenLabel = cfg.TokenLabel
 
