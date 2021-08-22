@@ -7,4 +7,4 @@ require (
 	github.com/tendermint/tendermint v0.34.12
 )
 
-replace github.com/ThalesIgnite/crypto11 => github.com/frumioj/crypto11 v1.2.5-0.20210331100338-d334790e1289
+replace github.com/ThalesIgnite/crypto11 => ../../../crypto11
