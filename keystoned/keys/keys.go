@@ -2,7 +2,7 @@ package keys
 
 import (
 	tmcrypto "github.com/tendermint/tendermint/crypto"
-	"github.com/ThalesIgnite/crypto11"
+	"github.com/frumioj/crypto11"
 )
 
 const (

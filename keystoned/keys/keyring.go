@@ -7,7 +7,7 @@ import (
 	"crypto/rand"
 	"crypto/elliptic"
 	
-	"github.com/ThalesIgnite/crypto11"
+	"github.com/frumioj/crypto11"
 )
 
 type Pkcs11Keyring struct {
