@@ -1,8 +1,12 @@
 package keys
 
 import (
-	tmcrypto "github.com/tendermint/tendermint/crypto"
+	"crypto"
+	"crypto/sha256"
+	"golang.org/x/crypto/ripemd160"
+
 	"github.com/frumioj/crypto11"
+	tmcrypto "github.com/tendermint/tendermint/crypto"
 )
 
 const (
@@ -12,13 +16,14 @@ const (
 	KEYGEN_RSA
 )
 
+const PUBLIC_KEY_SIZE = 33
+
 type KeygenAlgorithm int
 
 type CryptoKey struct {
-	Label      string
-	Algo       KeygenAlgorithm
-	pubKey     PubKey
-	signer     crypto11.Signer
+	Label  string
+	Algo   KeygenAlgorithm
+	signer crypto11.Signer
 }
 
 // CryptoPrivKey looks exactly the same as the LedgerPrivKey
@@ -33,6 +38,12 @@ type CryptoPrivKey interface {
 	Type() string
 }
 
+// CryptoPubKey looks a lot like a tmcrypto-inherited
+// PubKey, but is not defined in a protobuf message
+type CryptoPubKey struct {
+	Key []byte
+}
+
 // PubKey is exactly the same as the cosmos-sdk version
 // except without the proto.Message dependency
 type PubKey interface {
@@ -43,11 +54,14 @@ type PubKey interface {
 	Type() string
 }
 
-func (pk CryptoKey) Bytes() []byte{
+// Bytes will return only an empty byte array
+// because this key does not have access to
+// the actual key bytes
+func (pk CryptoKey) Bytes() []byte {
 	return []byte{}
 }
 
-func (pk CryptoKey) Sign( msg []byte) ([]byte, error){
+func (pk CryptoKey) Sign(msg []byte) ([]byte, error) {
 	return []byte{}, nil
 }
 
@@ -60,3 +74,16 @@ func (pk CryptoKey) PubKey() PubKey {
 }
 
 func (pk CryptoKey) Type() string { return "CryptoKey" }
+
+func (pk CryptoKey) Public() crypto.PublicKey { return pk.signer.Public() }
+
+func (pub *CryptoPubKey) Address() tmcrypto.Address {
+	if len(pub.Key) != PUBLIC_KEY_SIZE {
+		panic("length of pubkey is incorrect")
+	}
+
+	sha := sha256.Sum256(pub.Key)
+	hasherRIPEMD160 := ripemd160.New()
+	hasherRIPEMD160.Write(sha[:]) // does not error
+	return tmcrypto.Address(hasherRIPEMD160.Sum(nil))
+}
