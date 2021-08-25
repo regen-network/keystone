@@ -2,6 +2,8 @@ package keys
 
 import (
 	"crypto"
+	"crypto/ecdsa"
+	"crypto/elliptic"
 	"crypto/sha256"
 	"golang.org/x/crypto/ripemd160"
 
@@ -69,21 +71,25 @@ func (pk CryptoKey) Equals(other CryptoKey) bool {
 	return true
 }
 
-func (pk CryptoKey) PubKey() PubKey {
-	return pk.pubKey
-}
+//func (pk CryptoKey) PubKey() PubKey { return pk.signer.Public }
 
 func (pk CryptoKey) Type() string { return "CryptoKey" }
 
+func (pk CryptoKey) Delete() error { return pk.signer.Delete() }
+
 func (pk CryptoKey) Public() crypto.PublicKey { return pk.signer.Public() }
 
-func (pub *CryptoPubKey) Address() tmcrypto.Address {
-	if len(pub.Key) != PUBLIC_KEY_SIZE {
-		panic("length of pubkey is incorrect")
+func (pk CryptoKey) MarshalPublicKeyToAddress() tmcrypto.Address {
+
+	switch pub := pk.Public().(type) {
+	case *ecdsa.PublicKey:
+		publicKeyBytes := elliptic.Marshal(pub.Curve, pub.X, pub.Y)
+		sha := sha256.Sum256(publicKeyBytes)
+		hasherRIPEMD160 := ripemd160.New()
+		hasherRIPEMD160.Write(sha[:]) // does not error
+		return tmcrypto.Address(hasherRIPEMD160.Sum(nil))
+	default:
+		panic("Unsupported public key!")
 	}
 
-	sha := sha256.Sum256(pub.Key)
-	hasherRIPEMD160 := ripemd160.New()
-	hasherRIPEMD160.Write(sha[:]) // does not error
-	return tmcrypto.Address(hasherRIPEMD160.Sum(nil))
 }
