@@ -43,7 +43,7 @@ func TestCreateKeySecp256r1(t *testing.T) {
 	pemEncodedPub := pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: x509EncodedPub})
 
 	log.Printf("Public: %s", pemEncodedPub)
-	log.Printf("Address: %s", string(key.MarshalPublicKeyToAddress()))
+	log.Printf("Address: %s", string(key.PubKey().Address()))
 	err = key.Delete()
 	require.NoError(t, err)
 }
