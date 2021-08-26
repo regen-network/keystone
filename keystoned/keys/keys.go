@@ -43,7 +43,9 @@ type CryptoPrivKey interface {
 // CryptoPubKey looks a lot like a tmcrypto-inherited
 // PubKey, but is not defined in a protobuf message
 type CryptoPubKey struct {
-	Key []byte
+	crypto.PublicKey
+
+	address tmcrypto.Address
 }
 
 // PubKey is exactly the same as the cosmos-sdk version
@@ -71,7 +73,7 @@ func (pk CryptoKey) Equals(other CryptoKey) bool {
 	return true
 }
 
-//func (pk CryptoKey) PubKey() PubKey { return pk.signer.Public }
+func (pk CryptoKey) PubKey() CryptoPubKey { return CryptoPubKey{PublicKey: pk.signer.Public }}
 
 func (pk CryptoKey) Type() string { return "CryptoKey" }
 
@@ -79,11 +81,14 @@ func (pk CryptoKey) Delete() error { return pk.signer.Delete() }
 
 func (pk CryptoKey) Public() crypto.PublicKey { return pk.signer.Public() }
 
-func (pk CryptoKey) MarshalPublicKeyToAddress() tmcrypto.Address {
+func (pubKey *CryptoPubKey) MarshalPublicKeyToAddress() tmcrypto.Address {
 
-	switch pub := pk.Public().(type) {
+	switch pub := pubKey.PublicKey.(type) {
 	case *ecdsa.PublicKey:
-		publicKeyBytes := elliptic.Marshal(pub.Curve, pub.X, pub.Y)
+		// @@ TODO: currently does the btc secp256k1 transform
+		// but should also support r1, by looking first at
+		// curve params - switch inside a switch
+		publicKeyBytes := elliptic.MarshalCompressed(pub.Curve, pub.X, pub.Y)
 		sha := sha256.Sum256(publicKeyBytes)
 		hasherRIPEMD160 := ripemd160.New()
 		hasherRIPEMD160.Write(sha[:]) // does not error
