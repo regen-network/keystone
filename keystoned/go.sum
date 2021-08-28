@@ -258,6 +258,8 @@ github.com/fortytw2/leaktest v1.3.0 h1:u8491cBMTQ8ft8aeV+adlcytMZylmA5nnwwkRZjI8
 github.com/fortytw2/leaktest v1.3.0/go.mod h1:jDsjWgpAGjm2CA7WthBh/CdZYEPF31XHquHwclZch5g=
 github.com/franela/goblin v0.0.0-20200105215937-c9ffbefa60db/go.mod h1:7dvUGVsVBjqR7JHJk0brhHOZYGmfBYOrK0ZhYMEtBr4=
 github.com/franela/goreq v0.0.0-20171204163338-bcd34c9993f8/go.mod h1:ZhphrRTfi2rbfLwlschooIH4+wKKDR4Pdxhh+TRoA20=
+github.com/frumioj/crypto11 v1.2.5-0.20210823151709-946ce662cc0e h1:HRagc2sBsKLDvVVXQMaCEU8ueRFAl3txucwykhQPbGc=
+github.com/frumioj/crypto11 v1.2.5-0.20210823151709-946ce662cc0e/go.mod h1:/1u7qgWwAI7wja4BdNu5Vd5gqMtmtoiACHlhl46uY1E=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
 github.com/fsnotify/fsnotify v1.4.9 h1:hsms1Qyu0jgnwNXIxa+/V/PDsU6CfLf6CNO8H7IWoS4=
 github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4IgpuI1SZQ=
@@ -694,6 +696,12 @@ github.com/regen-network/keystone/keystoned/keys v0.0.0-20210820182155-3c88593bb
 github.com/regen-network/keystone/keystoned/keys v0.0.0-20210820182155-3c88593bbd68/go.mod h1:0Y7yrSpieCP02qf9kAa3Jn34TnaUTU+lN9bC+yVlLBs=
 github.com/regen-network/keystone/keystoned/keys v0.0.0-20210820193158-bb7e7e4e8e44 h1:SR8Lg55hIAkIp77EAIgO15FOuuwBYJxsqgeCw1vRxZo=
 github.com/regen-network/keystone/keystoned/keys v0.0.0-20210820193158-bb7e7e4e8e44/go.mod h1:0Y7yrSpieCP02qf9kAa3Jn34TnaUTU+lN9bC+yVlLBs=
+github.com/regen-network/keystone/keystoned/keys v0.0.0-20210821114406-d57f800b5417 h1:4jSuZYa/yg95k7PMfw7NviRNkY6MtZJuewDd048IoMI=
+github.com/regen-network/keystone/keystoned/keys v0.0.0-20210821114406-d57f800b5417/go.mod h1:BqN3W08tHeI4Akjl0SqS+Rb4mTrVAWMvYOIzeh0MVu8=
+github.com/regen-network/keystone/keystoned/keys v0.0.0-20210822103931-337bdc4c332d h1:HQm9ZPFy4HczK7n1NeOzNoPV3NgqcAXTSE/ElJ6zdRA=
+github.com/regen-network/keystone/keystoned/keys v0.0.0-20210822103931-337bdc4c332d/go.mod h1:BqN3W08tHeI4Akjl0SqS+Rb4mTrVAWMvYOIzeh0MVu8=
+github.com/regen-network/keystone/keystoned/keys v0.0.0-20210823173722-5de519e0203f h1:cOQ6KxRQjQz8FLOG1mZQjChwA9zHFqKqZq0652ciD6s=
+github.com/regen-network/keystone/keystoned/keys v0.0.0-20210823173722-5de519e0203f/go.mod h1:zCh0DRw57L1g9s6h3/V7GEjUBX4vFzE4QTugRvBF4iY=
 github.com/regen-network/protobuf v1.3.3-alpha.regen.1 h1:OHEc+q5iIAXpqiqFKeLpu5NwTIkVXUs48vFMwzqpqY4=
 github.com/regen-network/protobuf v1.3.3-alpha.regen.1/go.mod h1:2DjTFR1HhMQhiWC5sZ4OhQ3+NtdbZ6oBDKQwq5Ou+FI=
 github.com/regen-network/regen-ledger/orm v0.0.0-20210804173213-3265a868bf83 h1:AGQjd32AU0aSFpPIm2nYvJaf/HR+Zbqx4Y+1aUKIAXU=
