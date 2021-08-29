@@ -2,6 +2,7 @@ package keys
 
 import (
 	"log"
+	"bytes"
 	"crypto"
 	"crypto/ecdsa"
 	"crypto/elliptic"
@@ -68,6 +69,9 @@ func (pk CryptoKey) Bytes() []byte {
 	return []byte{}
 }
 
+// Sign a plaintext with this private key, first hashing the
+// plaintext with the "optional" hash function (pass nil for
+// a 'null' hash).
 func (pk CryptoKey) Sign(plaintext []byte, hashFun *crypto.Hash ) ([]byte, error) {
 
 	if hashFun != nil {
@@ -87,8 +91,36 @@ func (pk CryptoKey) Sign(plaintext []byte, hashFun *crypto.Hash ) ([]byte, error
 	}
 }
 
+// Equals checks whether two CryptoKeys are equal -
+// because there are no pk bytes to compare, this
+// comparison is done by signing a plaintext with both
+// keys, and if the signature bytes are equal, then
+// the keys are considered equal.
 func (pk CryptoKey) Equals(other CryptoKey) bool {
-	return true
+
+	plaintext := "are these keys equal?"
+
+	this, err := pk.Sign([]byte(plaintext), nil)
+
+	if err != nil {
+		// should this actually return an error though
+		// if signing fails?
+		return false
+	}
+
+	that, err := other.Sign([]byte(plaintext), nil)
+
+	if err != nil {
+		return false
+	}
+
+	if bytes.Equal( this, that ) {
+		return true
+	} else {
+		return false
+	}
+	
+	
 }
 
 func (pk CryptoKey) PubKey() *CryptoPubKey { return &CryptoPubKey{pk.signer.Public(), nil }}
