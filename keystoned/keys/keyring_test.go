@@ -44,6 +44,27 @@ func TestCreateKeySecp256r1(t *testing.T) {
 
 	log.Printf("Public: %s", pemEncodedPub)
 	log.Printf("Address: %s", string(key.PubKey().Address()))
+
+	key2 := key
+
+	log.Printf("Keys should be equal: %v", key.Equals(key2))
+
+	key3, err := kr.NewKey( KEYGEN_SECP256K1, string(label) )
+	require.NoError(t, err)
+	log.Printf("Keys should NOT be equal: %v", key.Equals(key3))
+	
 	err = key.Delete()
 	require.NoError(t, err)
+
+	// This delete should fail since key2 is a pointer to key
+	// which was already deleted
+	err = key2.Delete()
+
+	// Yes, there SHOULD be an error on this delete!
+	require.Error(t, err)
+
+	// key3 delete should pass
+	err = key3.Delete()
+	require.NoError(t, err)
+	
 }
