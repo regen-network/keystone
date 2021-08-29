@@ -36,6 +36,7 @@ type Keyring interface {
 // and typically is a large (unguessable) random number
 func (ring Pkcs11Keyring) NewKey(algorithm KeygenAlgorithm, label string) (CryptoKey, error) {
 
+	// Crypto-secure random bytes
 	id, err := randomBytes(16)
 
 	if err != nil {
@@ -50,8 +51,6 @@ func (ring Pkcs11Keyring) NewKey(algorithm KeygenAlgorithm, label string) (Crypt
 		key, err = ring.ctx.GenerateECDSAKeyPairWithLabel(id, []byte(label), crypto11.P256K1())
 	case KEYGEN_SECP256R1:
 		key, err = ring.ctx.GenerateECDSAKeyPairWithLabel(id, []byte(label), elliptic.P256())
-	case KEYGEN_RSA:
-		key, err = ring.ctx.GenerateRSAKeyPairWithLabel(id, []byte(label), 2048)
 	default:
 		return CryptoKey{}, err
 	}
