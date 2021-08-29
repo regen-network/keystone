@@ -98,29 +98,10 @@ func (pk CryptoKey) Sign(plaintext []byte, hashFun *crypto.Hash ) ([]byte, error
 // the keys are considered equal.
 func (pk CryptoKey) Equals(other CryptoKey) bool {
 
-	plaintext := "are these keys equal?"
+	this := pk.PubKey().Bytes()
+	that := other.PubKey().Bytes()
 
-	this, err := pk.Sign([]byte(plaintext), nil)
-
-	if err != nil {
-		// should this actually return an error though
-		// if signing fails?
-		return false
-	}
-
-	that, err := other.Sign([]byte(plaintext), nil)
-
-	if err != nil {
-		return false
-	}
-
-	if bytes.Equal( this, that ) {
-		return true
-	} else {
-		return false
-	}
-	
-	
+	return bytes.Equal(this, that)
 }
 
 func (pk CryptoKey) PubKey() *CryptoPubKey { return &CryptoPubKey{pk.signer.Public(), nil }}
