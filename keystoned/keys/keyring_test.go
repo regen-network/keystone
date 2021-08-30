@@ -23,6 +23,16 @@ func TestCreateKeySecp256k1(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, key)
 
+	msg := []byte("Signing this plaintext tells me what exactly?")
+	signed, err := key.Sign(msg)
+
+	require.NoError(t, err)
+	log.Printf("Signed byes: %v", signed)
+
+	verified := key.PubKey().VerifySignature(msg, signed) 
+
+	log.Printf("Did the signature verify? True = yes: %v", verified)
+	
 	err = key.Delete()
 	require.NoError(t, err)
 }
