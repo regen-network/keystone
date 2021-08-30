@@ -147,8 +147,11 @@ func (pubk CryptoPubKey) Equals(other CryptoPubKey) bool {
 	return bytes.Equal(this, that)
 }
 
-// dsaSignature is the two integers needed for
-// an ECDSA signature value
+// dsaSignature contains the two integers needed for
+// an ECDSA signature value. They must be put in a struct
+// to allow the asn1 unmarshalling which uses an interface{}
+// type to return the values, instead of just returning the
+// two integers.
 type dsaSignature struct {
 	R, S *big.Int
 }
@@ -156,7 +159,7 @@ type dsaSignature struct {
 func unmarshalDER(sigDER []byte) (*dsaSignature, error) {
 	var sig dsaSignature
 	
-	if rest, err := asn1.Unmarshal(sigDER, sig); err != nil {
+	if rest, err := asn1.Unmarshal(sigDER, &sig); err != nil {
 		return nil, err
 	} else if len(rest) > 0 {
 		return nil, errors.New("unexpected data found after DSA signature")
@@ -167,7 +170,6 @@ func unmarshalDER(sigDER []byte) (*dsaSignature, error) {
 
 func (pubk CryptoPubKey) VerifySignature(msg []byte, sig []byte) bool {
 
-	var rawsig *dsaSignature
 	rawsig, err := unmarshalDER(sig)
 
 	if err != nil {
