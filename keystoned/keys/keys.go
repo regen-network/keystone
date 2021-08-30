@@ -3,13 +3,17 @@ package keys
 import (
 	"log"
 	"bytes"
+	"math/big"
+	"errors"
+	
 	"crypto"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/sha256"
 	"crypto/rand"
 	"golang.org/x/crypto/ripemd160"
-
+	"encoding/asn1"
+	
 	"github.com/frumioj/crypto11"
 	tmcrypto "github.com/tendermint/tendermint/crypto"
 )
@@ -69,26 +73,11 @@ func (pk CryptoKey) Bytes() []byte {
 	return []byte{}
 }
 
-// Sign a plaintext with this private key, first hashing the
-// plaintext with the "optional" hash function (pass nil for
-// a 'null' hash).
-func (pk CryptoKey) Sign(plaintext []byte, hashFun *crypto.Hash ) ([]byte, error) {
-
-	if hashFun != nil {
-
-		h := hashFun.New()
-		_, err := h.Write(plaintext)
-		digest := h.Sum(nil)
-		
-		if err != nil {
-			log.Printf("Error creating digest %s", err.Error())
-			return []byte{}, nil
-		}
-		
-		return pk.signer.Sign(rand.Reader, digest[:], nil)
-	} else {
-		return pk.signer.Sign(rand.Reader, plaintext, nil)
-	}
+// Sign a plaintext with this private key. Any hashing
+// required by the caller must be done prior to this call
+// or left up to the HSM PKCS11 mechanism itself.
+func (pk CryptoKey) Sign(plaintext []byte) ([]byte, error) {
+	return pk.signer.Sign(rand.Reader, plaintext, nil)
 }
 
 // Equals checks whether two CryptoKeys are equal -
@@ -146,4 +135,45 @@ func (pubKey *CryptoPubKey) Address() tmcrypto.Address {
 		return pubKey.address
 	}
 
+}
+
+// Equals checks whether two CryptoPubKeys are equal -
+// by checking their marshalled byte values
+func (pubk CryptoPubKey) Equals(other CryptoPubKey) bool {
+
+	this := pubk.Bytes()
+	that := other.Bytes()
+
+	return bytes.Equal(this, that)
+}
+
+// dsaSignature is the two integers needed for
+// an ECDSA signature value
+type dsaSignature struct {
+	R, S *big.Int
+}
+
+func unmarshalDER(sigDER []byte) (*dsaSignature, error) {
+	var sig dsaSignature
+	
+	if rest, err := asn1.Unmarshal(sigDER, sig); err != nil {
+		return nil, err
+	} else if len(rest) > 0 {
+		return nil, errors.New("unexpected data found after DSA signature")
+	}
+	
+	return &sig, nil
+}
+
+func (pubk CryptoPubKey) VerifySignature(msg []byte, sig []byte) bool {
+
+	var rawsig *dsaSignature
+	rawsig, err := unmarshalDER(sig)
+
+	if err != nil {
+		log.Printf("Signature verification failed DER decode with: %s", err.Error())
+		return false
+	}
+
+	return ecdsa.Verify(pubk.PublicKey.(*ecdsa.PublicKey), msg, rawsig.R, rawsig.S)
 }
