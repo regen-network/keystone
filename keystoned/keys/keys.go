@@ -156,6 +156,10 @@ type dsaSignature struct {
 	R, S *big.Int
 }
 
+// unmarshalDER takes a DER-encoded byte array, and dumps
+// it into a (hopefully-appropriate) struct. If the struct
+// given, is not appropriate for the data, then unmarshalling
+// will fail. 
 func unmarshalDER(sigDER []byte) (*dsaSignature, error) {
 	var sig dsaSignature
 	
@@ -168,6 +172,11 @@ func unmarshalDER(sigDER []byte) (*dsaSignature, error) {
 	return &sig, nil
 }
 
+// VerifySignature takes a plaintext msg and the signed plaintext
+// which should be a DER-encoded byte array which can be marshalled
+// into two big Ints - r and s, which represent an ECDSA signature.
+// @@TODO: what if the signature is EDDSA or some other non-ECDSA
+// option that doesn't marshal to r and s?
 func (pubk CryptoPubKey) VerifySignature(msg []byte, sig []byte) bool {
 
 	rawsig, err := unmarshalDER(sig)
