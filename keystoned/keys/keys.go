@@ -16,6 +16,7 @@ import (
 	
 	"github.com/frumioj/crypto11"
 	tmcrypto "github.com/tendermint/tendermint/crypto"
+	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 )
 
 const (
@@ -42,9 +43,13 @@ type CryptoKey struct {
 type CryptoPrivKey interface {
 	Bytes() []byte
 	Sign(msg []byte) ([]byte, error)
-	PubKey() PubKey
+	PubKey() Pkcs11PubKey
 	Equals(CryptoPrivKey) bool
 	Type() string
+}
+
+type Pkcs11PubKey struct {
+	Key *CryptoPubKey
 }
 
 // CryptoPubKey looks a lot like a tmcrypto-inherited
@@ -58,25 +63,25 @@ type CryptoPubKey struct {
 
 // PubKey is exactly the same as the cosmos-sdk version
 // except without the proto.Message dependency
-type PubKey interface {
-	Address() tmcrypto.Address
-	Bytes() []byte
-	VerifySignature(msg []byte, sig []byte) bool
-	Equals(PubKey) bool
-	Type() string
-}
+// type PubKey interface {
+// 	Address() tmcrypto.Address
+// 	Bytes() []byte
+// 	VerifySignature(msg []byte, sig []byte) bool
+// 	Equals(PubKey) bool
+// 	Type() string
+// }
 
 // Bytes will return only an empty byte array
 // because this key does not have access to
 // the actual key bytes
-func (pk CryptoKey) Bytes() []byte {
+func (pk *CryptoKey) Bytes() []byte {
 	return []byte{}
 }
 
 // Sign a plaintext with this private key. Any hashing
 // required by the caller must be done prior to this call
 // or left up to the HSM PKCS11 mechanism itself.
-func (pk CryptoKey) Sign(plaintext []byte) ([]byte, error) {
+func (pk *CryptoKey) Sign(plaintext []byte) ([]byte, error) {
 	return pk.signer.Sign(rand.Reader, plaintext, nil)
 }
 
@@ -85,24 +90,24 @@ func (pk CryptoKey) Sign(plaintext []byte) ([]byte, error) {
 // comparison is done by signing a plaintext with both
 // keys, and if the signature bytes are equal, then
 // the keys are considered equal.
-func (pk CryptoKey) Equals(other CryptoKey) bool {
+func (pk *CryptoKey) Equals(other CryptoKey) bool {
 
-	this := pk.PubKey().Bytes()
-	that := other.PubKey().Bytes()
+	this := pk.PubKey()
+	that := other.PubKey()
 
-	return bytes.Equal(this, that)
+	return bytes.Equal(this.Bytes(), that.Bytes())
 }
 
-func (pk CryptoKey) PubKey() *CryptoPubKey { return &CryptoPubKey{pk.signer.Public(), nil }}
+func (pk *CryptoKey) PubKey() Pkcs11PubKey { return Pkcs11PubKey{Key: pk.signer.Public().(*CryptoPubKey)}}
 
-func (pk CryptoKey) Type() string { return "CryptoKey" }
+func (pk *CryptoKey) Type() string { return "CryptoKey" }
 
-func (pk CryptoKey) Delete() error { return pk.signer.Delete() }
+func (pk *CryptoKey) Delete() error { return pk.signer.Delete() }
 
-func (pk CryptoKey) Public() crypto.PublicKey { return pk.signer.Public() }
+func (pk *CryptoKey) Public() crypto.PublicKey { return pk.signer.Public() }
 
-func (pubKey *CryptoPubKey) Bytes() []byte {
-	switch pub := pubKey.PublicKey.(type) {
+func (pubKey *Pkcs11PubKey) Bytes() []byte {
+	switch pub := pubKey.Key.PublicKey.(type) {
 	case *ecdsa.PublicKey:
 		return elliptic.MarshalCompressed(pub.Curve, pub.X, pub.Y)
 	default:
@@ -113,10 +118,10 @@ func (pubKey *CryptoPubKey) Bytes() []byte {
 // Address takes a CryptoPubKey, expecting that it has
 // a crypto.PublicKey base struct, marshals the struct into bytes using
 // ANSI X.
-func (pubKey *CryptoPubKey) Address() tmcrypto.Address {
+func (pubKey *Pkcs11PubKey) Address() tmcrypto.Address {
 
-	if pubKey.address == nil {
-		switch pub := pubKey.PublicKey.(type) {
+	if pubKey.Key.address == nil {
+		switch pub := pubKey.Key.PublicKey.(type) {
 		case *ecdsa.PublicKey:
 			// @@ TODO: currently does the btc secp256k1 transform
 			// but should also support r1, by looking first at
@@ -125,24 +130,25 @@ func (pubKey *CryptoPubKey) Address() tmcrypto.Address {
 			sha := sha256.Sum256(publicKeyBytes)
 			hasherRIPEMD160 := ripemd160.New()
 			hasherRIPEMD160.Write(sha[:]) // does not error
-			pubKey.address = tmcrypto.Address(hasherRIPEMD160.Sum(nil))
-			return pubKey.address
+			pubKey.Key.address = tmcrypto.Address(hasherRIPEMD160.Sum(nil))
+			return pubKey.Key.address
 		default:
 			log.Printf("Type: %T", pub)
 			panic("Unsupported public key!")
 		}
 	} else {
-		return pubKey.address
+		return pubKey.Key.address
 	}
 
 }
 
 // Equals checks whether two CryptoPubKeys are equal -
 // by checking their marshalled byte values
-func (pubk CryptoPubKey) Equals(other CryptoPubKey) bool {
+func (pubk *Pkcs11PubKey) Equals(other cryptotypes.Pkcs11PubKey) bool {
 
+	otherPub := other.(*Pkcs11PubKey)
 	this := pubk.Bytes()
-	that := other.Bytes()
+	that := otherPub.Bytes()
 
 	return bytes.Equal(this, that)
 }
@@ -177,7 +183,7 @@ func unmarshalDER(sigDER []byte) (*dsaSignature, error) {
 // into two big Ints - r and s, which represent an ECDSA signature.
 // @@TODO: what if the signature is EDDSA or some other non-ECDSA
 // option that doesn't marshal to r and s?
-func (pubk CryptoPubKey) VerifySignature(msg []byte, sig []byte) bool {
+func (pubk *Pkcs11PubKey) VerifySignature(msg []byte, sig []byte) bool {
 
 	rawsig, err := unmarshalDER(sig)
 
@@ -186,5 +192,5 @@ func (pubk CryptoPubKey) VerifySignature(msg []byte, sig []byte) bool {
 		return false
 	}
 
-	return ecdsa.Verify(pubk.PublicKey.(*ecdsa.PublicKey), msg, rawsig.R, rawsig.S)
+	return ecdsa.Verify(pubk.Key.PublicKey.(*ecdsa.PublicKey), msg, rawsig.R, rawsig.S)
 }
