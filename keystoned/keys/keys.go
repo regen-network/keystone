@@ -43,19 +43,15 @@ type CryptoKey struct {
 type CryptoPrivKey interface {
 	Bytes() []byte
 	Sign(msg []byte) ([]byte, error)
-	PubKey() Pkcs11PubKey
+	PubKey() PubKey
 	Equals(CryptoPrivKey) bool
 	Type() string
-}
-
-type Pkcs11PubKey struct {
-	Key *CryptoPubKey
 }
 
 // CryptoPubKey looks a lot like a tmcrypto-inherited
 // PubKey, but is not defined in a protobuf message
 // See cosmos-sdk/crypto/keys/internal/ecdsa/pubkey.go for inspiration
-type CryptoPubKey struct {
+type PubKey struct {
 	crypto.PublicKey
 
 	address tmcrypto.Address
@@ -98,7 +94,7 @@ func (pk *CryptoKey) Equals(other CryptoKey) bool {
 	return bytes.Equal(this.Bytes(), that.Bytes())
 }
 
-func (pk *CryptoKey) PubKey() Pkcs11PubKey { return Pkcs11PubKey{Key: pk.signer.Public().(*CryptoPubKey)}}
+func (pk *CryptoKey) PubKey() PubKey { return PubKey{pk.signer.Public(), nil}}
 
 func (pk *CryptoKey) Type() string { return "CryptoKey" }
 
@@ -106,8 +102,8 @@ func (pk *CryptoKey) Delete() error { return pk.signer.Delete() }
 
 func (pk *CryptoKey) Public() crypto.PublicKey { return pk.signer.Public() }
 
-func (pubKey *Pkcs11PubKey) Bytes() []byte {
-	switch pub := pubKey.Key.PublicKey.(type) {
+func (pubKey *PubKey) Bytes() []byte {
+	switch pub := pubKey.PublicKey.(type) {
 	case *ecdsa.PublicKey:
 		return elliptic.MarshalCompressed(pub.Curve, pub.X, pub.Y)
 	default:
@@ -115,13 +111,13 @@ func (pubKey *Pkcs11PubKey) Bytes() []byte {
 	}
 }
 
-// Address takes a CryptoPubKey, expecting that it has
+// Address takes a PubKey, expecting that it has
 // a crypto.PublicKey base struct, marshals the struct into bytes using
 // ANSI X.
-func (pubKey *Pkcs11PubKey) Address() tmcrypto.Address {
+func (pubKey *PubKey) Address() tmcrypto.Address {
 
-	if pubKey.Key.address == nil {
-		switch pub := pubKey.Key.PublicKey.(type) {
+	if pubKey.address == nil {
+		switch pub := pubKey.PublicKey.(type) {
 		case *ecdsa.PublicKey:
 			// @@ TODO: currently does the btc secp256k1 transform
 			// but should also support r1, by looking first at
@@ -130,25 +126,24 @@ func (pubKey *Pkcs11PubKey) Address() tmcrypto.Address {
 			sha := sha256.Sum256(publicKeyBytes)
 			hasherRIPEMD160 := ripemd160.New()
 			hasherRIPEMD160.Write(sha[:]) // does not error
-			pubKey.Key.address = tmcrypto.Address(hasherRIPEMD160.Sum(nil))
-			return pubKey.Key.address
+			pubKey.address = tmcrypto.Address(hasherRIPEMD160.Sum(nil))
+			return pubKey.address
 		default:
 			log.Printf("Type: %T", pub)
 			panic("Unsupported public key!")
 		}
 	} else {
-		return pubKey.Key.address
+		return pubKey.address
 	}
 
 }
 
-// Equals checks whether two CryptoPubKeys are equal -
+// Equals checks whether two PubKeys are equal -
 // by checking their marshalled byte values
-func (pubk *Pkcs11PubKey) Equals(other cryptotypes.Pkcs11PubKey) bool {
+func (pubk *PubKey) Equals(other cryptotypes.PubKey) bool {
 
-	otherPub := other.(*Pkcs11PubKey)
 	this := pubk.Bytes()
-	that := otherPub.Bytes()
+	that := other.Bytes()
 
 	return bytes.Equal(this, that)
 }
@@ -183,7 +178,7 @@ func unmarshalDER(sigDER []byte) (*dsaSignature, error) {
 // into two big Ints - r and s, which represent an ECDSA signature.
 // @@TODO: what if the signature is EDDSA or some other non-ECDSA
 // option that doesn't marshal to r and s?
-func (pubk *Pkcs11PubKey) VerifySignature(msg []byte, sig []byte) bool {
+func (pubk *PubKey) VerifySignature(msg []byte, sig []byte) bool {
 
 	rawsig, err := unmarshalDER(sig)
 
@@ -192,5 +187,5 @@ func (pubk *Pkcs11PubKey) VerifySignature(msg []byte, sig []byte) bool {
 		return false
 	}
 
-	return ecdsa.Verify(pubk.Key.PublicKey.(*ecdsa.PublicKey), msg, rawsig.R, rawsig.S)
+	return ecdsa.Verify(pubk.PublicKey.(*ecdsa.PublicKey), msg, rawsig.R, rawsig.S)
 }
