@@ -189,3 +189,6 @@ func (pubk *PubKey) VerifySignature(msg []byte, sig []byte) bool {
 
 	return ecdsa.Verify(pubk.PublicKey.(*ecdsa.PublicKey), msg, rawsig.R, rawsig.S)
 }
+
+//ProtoMessage implementation is required by types.Pubkey
+func (pubk *PubKey) ProtoMessage() {}
