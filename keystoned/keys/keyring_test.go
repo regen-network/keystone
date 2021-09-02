@@ -29,7 +29,8 @@ func TestCreateKeySecp256k1(t *testing.T) {
 	require.NoError(t, err)
 	log.Printf("Signed byes: %v", signed)
 
-	verified := key.PubKey().VerifySignature(msg, signed) 
+	pub := key.PubKey()
+	verified := pub.VerifySignature(msg, signed) 
 
 	log.Printf("Did the signature verify? True = yes: %v", verified)
 	
@@ -53,7 +54,9 @@ func TestCreateKeySecp256r1(t *testing.T) {
 	pemEncodedPub := pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: x509EncodedPub})
 
 	log.Printf("Public: %s", pemEncodedPub)
-	log.Printf("Address: %s", string(key.PubKey().Address()))
+	pub := key.PubKey()
+	
+	log.Printf("Address: %s", string(pub.Address()))
 
 	key2 := key
 
