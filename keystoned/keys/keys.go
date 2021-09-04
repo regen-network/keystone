@@ -1,22 +1,14 @@
 package keys
 
 import (
-	"log"
 	"bytes"
-	"math/big"
-	"errors"
 	
 	"crypto"
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/sha256"
 	"crypto/rand"
-	"golang.org/x/crypto/ripemd160"
-	"encoding/asn1"
 	
 	"github.com/frumioj/crypto11"
-	tmcrypto "github.com/tendermint/tendermint/crypto"
-	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
+	"github.com/cosmos/cosmos-sdk/crypto/types"
+
 )
 
 const (
@@ -34,6 +26,7 @@ type CryptoKey struct {
 	Label  string
 	Algo   KeygenAlgorithm
 	signer crypto11.Signer
+	Pubk   types.PubKey
 }
 
 // CryptoPrivKey looks exactly the same as the LedgerPrivKey
@@ -43,7 +36,7 @@ type CryptoKey struct {
 type CryptoPrivKey interface {
 	Bytes() []byte
 	Sign(msg []byte) ([]byte, error)
-	PubKey() PubKey
+	PubKey() types.PubKey
 	Equals(CryptoPrivKey) bool
 	Type() string
 }
@@ -51,11 +44,11 @@ type CryptoPrivKey interface {
 // CryptoPubKey looks a lot like a tmcrypto-inherited
 // PubKey, but is not defined in a protobuf message
 // See cosmos-sdk/crypto/keys/internal/ecdsa/pubkey.go for inspiration
-type PubKey struct {
-	crypto.PublicKey
+// type PubKey struct {
+// 	crypto.PublicKey
 
-	address tmcrypto.Address
-}
+// 	address tmcrypto.Address
+// }
 
 // PubKey is exactly the same as the cosmos-sdk version
 // except without the proto.Message dependency
@@ -94,7 +87,7 @@ func (pk *CryptoKey) Equals(other CryptoKey) bool {
 	return bytes.Equal(this.Bytes(), that.Bytes())
 }
 
-func (pk *CryptoKey) PubKey() PubKey { return PubKey{pk.signer.Public(), nil}}
+func (pk *CryptoKey) PubKey() types.PubKey { return pk.Pubk }
 
 func (pk *CryptoKey) Type() string { return "CryptoKey" }
 
@@ -102,93 +95,90 @@ func (pk *CryptoKey) Delete() error { return pk.signer.Delete() }
 
 func (pk *CryptoKey) Public() crypto.PublicKey { return pk.signer.Public() }
 
-func (pubKey *PubKey) Bytes() []byte {
-	switch pub := pubKey.PublicKey.(type) {
-	case *ecdsa.PublicKey:
-		return elliptic.MarshalCompressed(pub.Curve, pub.X, pub.Y)
-	default:
-		panic("Unsupported public key type!")
-	}
-}
+// func (pubKey *PubKey) Bytes() []byte {
+// 	switch pub := pubKey.PublicKey.(type) {
+// 	case *ecdsa.PublicKey:
+// 		return elliptic.MarshalCompressed(pub.Curve, pub.X, pub.Y)
+// 	default:
+// 		panic("Unsupported public key type!")
+// 	}
+// }
 
 // Address takes a PubKey, expecting that it has
 // a crypto.PublicKey base struct, marshals the struct into bytes using
 // ANSI X.
-func (pubKey *PubKey) Address() tmcrypto.Address {
+// func (pubKey *PubKey) Address() tmcrypto.Address {
 
-	if pubKey.address == nil {
-		switch pub := pubKey.PublicKey.(type) {
-		case *ecdsa.PublicKey:
-			// @@ TODO: currently does the btc secp256k1 transform
-			// but should also support r1, by looking first at
-			// curve params - switch inside a switch
-			publicKeyBytes := pubKey.Bytes()
-			sha := sha256.Sum256(publicKeyBytes)
-			hasherRIPEMD160 := ripemd160.New()
-			hasherRIPEMD160.Write(sha[:]) // does not error
-			pubKey.address = tmcrypto.Address(hasherRIPEMD160.Sum(nil))
-			return pubKey.address
-		default:
-			log.Printf("Type: %T", pub)
-			panic("Unsupported public key!")
-		}
-	} else {
-		return pubKey.address
-	}
+// 	if pubKey.address == nil {
+// 		switch pub := pubKey.PublicKey.(type) {
+// 		case *ecdsa.PublicKey:
+// 			// @@ TODO: currently does the btc secp256k1 transform
+// 			// but should also support r1, by looking first at
+// 			// curve params - switch inside a switch
+// 			publicKeyBytes := pubKey.Bytes()
+// 			sha := sha256.Sum256(publicKeyBytes)
+// 			hasherRIPEMD160 := ripemd160.New()
+// 			hasherRIPEMD160.Write(sha[:]) // does not error
+// 			pubKey.address = tmcrypto.Address(hasherRIPEMD160.Sum(nil))
+// 			return pubKey.address
+// 		default:
+// 			log.Printf("Type: %T", pub)
+// 			panic("Unsupported public key!")
+// 		}
+// 	} else {
+// 		return pubKey.address
+// 	}
 
-}
+// }
 
 // Equals checks whether two PubKeys are equal -
 // by checking their marshalled byte values
-func (pubk *PubKey) Equals(other cryptotypes.PubKey) bool {
+// func (pubk *PubKey) Equals(other cryptotypes.PubKey) bool {
 
-	this := pubk.Bytes()
-	that := other.Bytes()
+// 	this := pubk.Bytes()
+// 	that := other.Bytes()
 
-	return bytes.Equal(this, that)
-}
+// 	return bytes.Equal(this, that)
+// }
 
 // dsaSignature contains the two integers needed for
 // an ECDSA signature value. They must be put in a struct
 // to allow the asn1 unmarshalling which uses an interface{}
 // type to return the values, instead of just returning the
 // two integers.
-type dsaSignature struct {
-	R, S *big.Int
-}
+// type dsaSignature struct {
+// 	R, S *big.Int
+// }
 
 // unmarshalDER takes a DER-encoded byte array, and dumps
 // it into a (hopefully-appropriate) struct. If the struct
 // given, is not appropriate for the data, then unmarshalling
 // will fail. 
-func unmarshalDER(sigDER []byte) (*dsaSignature, error) {
-	var sig dsaSignature
+// func unmarshalDER(sigDER []byte) (*dsaSignature, error) {
+// 	var sig dsaSignature
 	
-	if rest, err := asn1.Unmarshal(sigDER, &sig); err != nil {
-		return nil, err
-	} else if len(rest) > 0 {
-		return nil, errors.New("unexpected data found after DSA signature")
-	}
+// 	if rest, err := asn1.Unmarshal(sigDER, &sig); err != nil {
+// 		return nil, err
+// 	} else if len(rest) > 0 {
+// 		return nil, errors.New("unexpected data found after DSA signature")
+// 	}
 	
-	return &sig, nil
-}
+// 	return &sig, nil
+// }
 
 // VerifySignature takes a plaintext msg and the signed plaintext
 // which should be a DER-encoded byte array which can be marshalled
 // into two big Ints - r and s, which represent an ECDSA signature.
 // @@TODO: what if the signature is EDDSA or some other non-ECDSA
 // option that doesn't marshal to r and s?
-func (pubk *PubKey) VerifySignature(msg []byte, sig []byte) bool {
+// func (pubk *PubKey) VerifySignature(msg []byte, sig []byte) bool {
 
-	rawsig, err := unmarshalDER(sig)
+// 	rawsig, err := unmarshalDER(sig)
 
-	if err != nil {
-		log.Printf("Signature verification failed DER decode with: %s", err.Error())
-		return false
-	}
+// 	if err != nil {
+// 		log.Printf("Signature verification failed DER decode with: %s", err.Error())
+// 		return false
+// 	}
 
-	return ecdsa.Verify(pubk.PublicKey.(*ecdsa.PublicKey), msg, rawsig.R, rawsig.S)
-}
-
-//ProtoMessage implementation is required by types.Pubkey
-func (pubk *PubKey) ProtoMessage() {}
+// 	return ecdsa.Verify(pubk.PublicKey.(*ecdsa.PublicKey), msg, rawsig.R, rawsig.S)
+// }
