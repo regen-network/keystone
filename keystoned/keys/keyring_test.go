@@ -8,7 +8,8 @@ import (
 
 	//"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
+	btcsecp256k1 "github.com/btcsuite/btcd/btcec"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 )
 
 func TestCreateKeySecp256k1(t *testing.T) {
@@ -28,11 +29,20 @@ func TestCreateKeySecp256k1(t *testing.T) {
 
 	require.NoError(t, err)
 	log.Printf("Signed byes: %v", signed)
+	pubKey := getPubKey( &key )
+	log.Printf("Key: %v", pubKey.(*secp256k1.PubKey))
+	secp256k1key := pubKey.(*secp256k1.PubKey)
+	pub, err := btcsecp256k1.ParsePubKey(secp256k1key.Key, btcsecp256k1.S256())
+	
+	if err != nil {
+		log.Printf("Not a secp256k1 key?")
+	}
 
-	pub := key.PubKey()
-	verified := pub.VerifySignature(msg, signed) 
+	log.Printf("Pub: %v", pub) 
 
-	log.Printf("Did the signature verify? True = yes: %v", verified)
+	valid := secp256k1key.VerifySignature( msg, signed )
+	
+	log.Printf("Did the signature verify? True = yes: %v", valid)
 	
 	err = key.Delete()
 	require.NoError(t, err)
@@ -54,17 +64,17 @@ func TestCreateKeySecp256r1(t *testing.T) {
 	pemEncodedPub := pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: x509EncodedPub})
 
 	log.Printf("Public: %s", pemEncodedPub)
-	pub := key.PubKey()
+	//pub := key.PubKey()
 	
-	log.Printf("Address: %s", string(pub.Address()))
+	//log.Printf("Address: %s", string(pub.Address()))
 
 	key2 := key
 
-	log.Printf("Keys should be equal: %v", key.Equals(key2))
+	//log.Printf("Keys should be equal: %v", key.Equals(key2))
 
-	key3, err := kr.NewKey( KEYGEN_SECP256K1, string(label) )
-	require.NoError(t, err)
-	log.Printf("Keys should NOT be equal: %v", key.Equals(key3))
+	//key3, err := kr.NewKey( KEYGEN_SECP256K1, string(label) )
+	//require.NoError(t, err)
+	//log.Printf("Keys should NOT be equal: %v", key.Equals(key3))
 	
 	err = key.Delete()
 	require.NoError(t, err)
@@ -77,7 +87,7 @@ func TestCreateKeySecp256r1(t *testing.T) {
 	require.Error(t, err)
 
 	// key3 delete should pass
-	err = key3.Delete()
-	require.NoError(t, err)
+	//err = key3.Delete()
+	//require.NoError(t, err)
 	
 }
