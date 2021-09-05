@@ -2,12 +2,17 @@ package keys
 
 import (
 	"bytes"
+	"log"
 	
 	"crypto"
 	"crypto/rand"
+	"crypto/elliptic"
+	"crypto/ecdsa"
 	
 	"github.com/frumioj/crypto11"
 	"github.com/cosmos/cosmos-sdk/crypto/types"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
+
 
 )
 
@@ -26,7 +31,7 @@ type CryptoKey struct {
 	Label  string
 	Algo   KeygenAlgorithm
 	signer crypto11.Signer
-	Pubk   types.PubKey
+	pubk   types.PubKey
 }
 
 // CryptoPrivKey looks exactly the same as the LedgerPrivKey
@@ -87,7 +92,7 @@ func (pk *CryptoKey) Equals(other CryptoKey) bool {
 	return bytes.Equal(this.Bytes(), that.Bytes())
 }
 
-func (pk *CryptoKey) PubKey() types.PubKey { return pk.Pubk }
+func (pk *CryptoKey) PubKey() types.PubKey { return pk.pubk }
 
 func (pk *CryptoKey) Type() string { return "CryptoKey" }
 
@@ -95,14 +100,15 @@ func (pk *CryptoKey) Delete() error { return pk.signer.Delete() }
 
 func (pk *CryptoKey) Public() crypto.PublicKey { return pk.signer.Public() }
 
-// func (pubKey *PubKey) Bytes() []byte {
-// 	switch pub := pubKey.PublicKey.(type) {
-// 	case *ecdsa.PublicKey:
-// 		return elliptic.MarshalCompressed(pub.Curve, pub.X, pub.Y)
-// 	default:
-// 		panic("Unsupported public key type!")
-// 	}
-// }
+func (pk *CryptoKey) PubKeyBytes() []byte {
+ 	switch pub := pk.Public().(type) {
+ 	case *ecdsa.PublicKey:
+		// is this OK for a *btcec* secp256k1 key?
+ 		return elliptic.MarshalCompressed(pub.Curve, pub.X, pub.Y)
+ 	default:
+ 		panic("Unsupported public key type!")
+ 	}
+}
 
 // Address takes a PubKey, expecting that it has
 // a crypto.PublicKey base struct, marshals the struct into bytes using
@@ -182,3 +188,16 @@ func (pk *CryptoKey) Public() crypto.PublicKey { return pk.signer.Public() }
 
 // 	return ecdsa.Verify(pubk.PublicKey.(*ecdsa.PublicKey), msg, rawsig.R, rawsig.S)
 // }
+
+func getPubKey(pk *CryptoKey) (types.PubKey) {
+ 	switch pub := pk.Public().(type) {
+ 	case *ecdsa.PublicKey:
+		log.Printf("Curve: %s", pub.Curve.Params().Name)
+
+		log.Printf("Curve = p256? %v", pub.Curve == elliptic.P256())
+		// is this OK for a *btcec* secp256k1 key?
+ 		return &secp256k1.PubKey{Key: elliptic.MarshalCompressed(pub.Curve, pub.X, pub.Y)}
+ 	default:
+ 		panic("Unsupported public key type!")
+ 	}
+}
