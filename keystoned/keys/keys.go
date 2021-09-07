@@ -3,11 +3,15 @@ package keys
 import (
 	"bytes"
 	"log"
+	"errors"
+	"math/big"
 	
 	"crypto"
 	"crypto/rand"
 	"crypto/elliptic"
 	"crypto/ecdsa"
+	"crypto/sha256"
+	"encoding/asn1"
 	
 	"github.com/frumioj/crypto11"
 	"github.com/cosmos/cosmos-sdk/crypto/types"
@@ -20,12 +24,30 @@ const (
 	KEYGEN_SECP256K1 KeygenAlgorithm = iota
 	KEYGEN_SECP256R1
 	KEYGEN_ED25519
-	KEYGEN_RSA
+)
+
+const (
+	// SIGNING_OPTS_BC_ECDSA_SHAXXX means
+	//   i) SHAXXX hash prior to signing
+	//  ii) Raw signature (R||S, no DER)
+	// iii) low-s normalized
+	SIGNING_OPTS_BC_ECDSA_SHA256 SigningProfile = iota
+
+	// Could also have:
+	//SIGNING_OPTS_BC_ECDSA_SHA384
+	//SIGNING_OPTS_BC_ECDSA_SHA512
+	
+	// SIGNING_OPTS_ECDSA means
+	//   i) No hash in the signing process
+	//  ii) DER signature as in usual ECDSA
+	// iii) No low-s normalization
+	SIGNING_OPTS_ECDSA
 )
 
 const PUBLIC_KEY_SIZE = 33
 
 type KeygenAlgorithm int
+type SigningProfile int
 
 type CryptoKey struct {
 	Label  string
@@ -34,36 +56,17 @@ type CryptoKey struct {
 	pubk   types.PubKey
 }
 
-// CryptoPrivKey looks exactly the same as the LedgerPrivKey
-// interface from cosmos-sdk/crypto/types. There is no ability
-// to retrieve the private key bytes because these are stored
-// and used only within the HSM.
+// CryptoPrivKey looks almost exactly the same as the LedgerPrivKey
+// interface from cosmos-sdk/crypto/types. There is no ability to
+// retrieve the private key bytes because these are stored and used
+// only within the HSM.
 type CryptoPrivKey interface {
 	Bytes() []byte
-	Sign(msg []byte) ([]byte, error)
+	Sign(msg []byte, opts *SigningProfile) ([]byte, error)
 	PubKey() types.PubKey
 	Equals(CryptoPrivKey) bool
 	Type() string
 }
-
-// CryptoPubKey looks a lot like a tmcrypto-inherited
-// PubKey, but is not defined in a protobuf message
-// See cosmos-sdk/crypto/keys/internal/ecdsa/pubkey.go for inspiration
-// type PubKey struct {
-// 	crypto.PublicKey
-
-// 	address tmcrypto.Address
-// }
-
-// PubKey is exactly the same as the cosmos-sdk version
-// except without the proto.Message dependency
-// type PubKey interface {
-// 	Address() tmcrypto.Address
-// 	Bytes() []byte
-// 	VerifySignature(msg []byte, sig []byte) bool
-// 	Equals(PubKey) bool
-// 	Type() string
-// }
 
 // Bytes will return only an empty byte array
 // because this key does not have access to
@@ -75,8 +78,45 @@ func (pk *CryptoKey) Bytes() []byte {
 // Sign a plaintext with this private key. Any hashing
 // required by the caller must be done prior to this call
 // or left up to the HSM PKCS11 mechanism itself.
-func (pk *CryptoKey) Sign(plaintext []byte) ([]byte, error) {
-	return pk.signer.Sign(rand.Reader, plaintext, nil)
+func (pk *CryptoKey) Sign(plaintext []byte, opts *SigningProfile) ([]byte, error) {
+
+	var digested []byte
+
+	// Blockchain-flavoured ECDSA (as of 9/2021) means required
+	// sha256 hashing of plaintext prior to signing.
+	if opts == nil || *opts == SIGNING_OPTS_BC_ECDSA_SHA256 {
+		digest := sha256.Sum256(plaintext)
+		digested = digest[:]
+	} else {
+		digested = plaintext
+	}
+	
+	sigbytes, err := pk.signer.Sign(rand.Reader, digested, nil)
+
+	if err != nil {
+		log.Printf("Signature failed: %s", err.Error())
+		return nil, err
+	}
+	
+	// Default signature mechanism is the blockchain flavour of
+	// ECDSA (see const definitions above) which means now getting
+	// the raw signature and low-s normalizing the s component of
+	// the signature
+	if opts == nil || *opts == SIGNING_OPTS_BC_ECDSA_SHA256 {
+		// un-DER the sig
+		var rawsig *dsaSignature
+		rawsig, err := unmarshalDER( sigbytes )
+		
+		if err != nil {
+			log.Printf("Error getting ints from DER: %s", err.Error())
+			return nil, err
+		}
+
+		return signatureRaw( rawsig.R, NormalizeS( rawsig.S )), nil
+		
+	} else {
+		return sigbytes, nil
+	}
 }
 
 // Equals checks whether two CryptoKeys are equal -
@@ -152,25 +192,67 @@ func (pk *CryptoKey) PubKeyBytes() []byte {
 // to allow the asn1 unmarshalling which uses an interface{}
 // type to return the values, instead of just returning the
 // two integers.
-// type dsaSignature struct {
-// 	R, S *big.Int
-// }
+type dsaSignature struct {
+	R, S *big.Int
+}
 
 // unmarshalDER takes a DER-encoded byte array, and dumps
 // it into a (hopefully-appropriate) struct. If the struct
 // given, is not appropriate for the data, then unmarshalling
 // will fail. 
-// func unmarshalDER(sigDER []byte) (*dsaSignature, error) {
-// 	var sig dsaSignature
+func unmarshalDER(sigDER []byte) (*dsaSignature, error) {
+	var sig dsaSignature
 	
-// 	if rest, err := asn1.Unmarshal(sigDER, &sig); err != nil {
-// 		return nil, err
-// 	} else if len(rest) > 0 {
-// 		return nil, errors.New("unexpected data found after DSA signature")
-// 	}
+	if rest, err := asn1.Unmarshal(sigDER, &sig); err != nil {
+		return nil, err
+	} else if len(rest) > 0 {
+		return nil, errors.New("unexpected data found after DSA signature")
+	}
 	
-// 	return &sig, nil
-// }
+	return &sig, nil
+}
+
+// p256Order returns the curve order for the secp256r1 curve
+// NOTE: this is specific to the secp256r1/P256 curve,
+// and not taken from the domain params for the key itself
+// (which would be a more generic approach for all EC).
+var p256Order = elliptic.P256().Params().N
+
+// p256HalfOrder returns half the curve order
+// a bit shift of 1 to the right (Rsh) is equivalent
+// to division by 2, only faster.
+var p256HalfOrder = new(big.Int).Rsh(p256Order, 1)
+
+// IsSNormalized returns true for the integer sigS if sigS falls in
+// lower half of the curve order
+func IsSNormalized(sigS *big.Int) bool {
+	return sigS.Cmp(p256HalfOrder) != 1
+}
+
+// NormalizeS will invert the s value if not already in the lower half
+// of curve order value
+func NormalizeS(sigS *big.Int) *big.Int {
+
+	if IsSNormalized(sigS) {
+		return sigS
+	}
+
+	return new(big.Int).Sub(p256Order, sigS)
+}
+
+// signatureRaw takes two big integers and returns a byte value that
+// is the result of concatenating the byte values of each of the given
+// integers. The byte values are left-padded with zeroes
+func signatureRaw(r *big.Int, s *big.Int) []byte {
+
+	rBytes := r.Bytes()
+	sBytes := s.Bytes()
+	sigBytes := make([]byte, 64)
+	// 0 pad the byte arrays from the left if they aren't big enough.
+	copy(sigBytes[32-len(rBytes):32], rBytes)
+	copy(sigBytes[64-len(sBytes):64], sBytes)
+	return sigBytes
+}
 
 // VerifySignature takes a plaintext msg and the signed plaintext
 // which should be a DER-encoded byte array which can be marshalled
