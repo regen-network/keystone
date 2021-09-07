@@ -26,6 +26,9 @@ const (
 	KEYGEN_ED25519
 )
 
+// SigningProfile is a combination of cryptographic signing mechanism,
+// prior hashing of the plaintext, transformations such as
+// s-normalization of signature, and post-encoding of the signature.
 const (
 	// SIGNING_OPTS_BC_ECDSA_SHAXXX means
 	//   i) SHAXXX hash prior to signing
@@ -36,6 +39,7 @@ const (
 	// Could also have:
 	//SIGNING_OPTS_BC_ECDSA_SHA384
 	//SIGNING_OPTS_BC_ECDSA_SHA512
+	// just need to add the appropriate hashing into the Sign API
 	
 	// SIGNING_OPTS_ECDSA means
 	//   i) No hash in the signing process
