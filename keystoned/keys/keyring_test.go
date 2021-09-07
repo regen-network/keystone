@@ -14,7 +14,9 @@ import (
 
 func TestCreateKeySecp256k1(t *testing.T) {
 
-	// hardcoded path for now - might change this API to actually take a JSON string and let caller decide how to get that JSON
+	// hardcoded path for now - might change this API to actually
+	// take a JSON string and let caller decide how to get that
+	// JSON
 	kr, err := NewPkcs11FromConfig("./pkcs11-config")
 	require.NoError(t, err)
 	label, err := randomBytes(16)
@@ -25,7 +27,7 @@ func TestCreateKeySecp256k1(t *testing.T) {
 	require.NotNil(t, key)
 
 	msg := []byte("Signing this plaintext tells me what exactly?")
-	signed, err := key.Sign(msg)
+	signed, err := key.Sign(msg, nil)
 
 	require.NoError(t, err)
 	log.Printf("Signed byes: %v", signed)
@@ -40,6 +42,10 @@ func TestCreateKeySecp256k1(t *testing.T) {
 
 	log.Printf("Pub: %v", pub) 
 
+	// @@TODO fails because sign doesn't sign in the right way
+	// including the possibility of malleable sig
+	// need to unDER the signature, and make sure it's low-s
+	// normalized
 	valid := secp256k1key.VerifySignature( msg, signed )
 	
 	log.Printf("Did the signature verify? True = yes: %v", valid)
