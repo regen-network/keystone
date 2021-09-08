@@ -1,15 +1,15 @@
 package keys
 
 import (
-	"log"
-	"testing"
 	"crypto/x509"
 	"encoding/pem"
+	"log"
+	"testing"
 
 	//"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	btcsecp256k1 "github.com/btcsuite/btcd/btcec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCreateKeySecp256k1(t *testing.T) {
@@ -21,8 +21,8 @@ func TestCreateKeySecp256k1(t *testing.T) {
 	require.NoError(t, err)
 	label, err := randomBytes(16)
 	require.NoError(t, err)
-	
-	key, err := kr.NewKey( KEYGEN_SECP256K1, string(label) )
+
+	key, err := kr.NewKey(KEYGEN_SECP256K1, string(label))
 	require.NoError(t, err)
 	require.NotNil(t, key)
 
@@ -31,25 +31,25 @@ func TestCreateKeySecp256k1(t *testing.T) {
 
 	require.NoError(t, err)
 	log.Printf("Signed byes: %v", signed)
-	pubKey := getPubKey( &key )
+	pubKey := getPubKey(&key)
 	log.Printf("Key: %v", pubKey.(*secp256k1.PubKey))
 	secp256k1key := pubKey.(*secp256k1.PubKey)
 	pub, err := btcsecp256k1.ParsePubKey(secp256k1key.Key, btcsecp256k1.S256())
-	
+
 	if err != nil {
 		log.Printf("Not a secp256k1 key?")
 	}
 
-	log.Printf("Pub: %v", pub) 
+	log.Printf("Pub: %v", pub)
 
-	// @@TODO fails because sign doesn't sign in the right way
-	// including the possibility of malleable sig
-	// need to unDER the signature, and make sure it's low-s
-	// normalized
-	valid := secp256k1key.VerifySignature( msg, signed )
-	
+	// Validate the signature made by the HSM key, but using the
+	// BTC secp256k1 public key
+	valid := secp256k1key.VerifySignature(msg, signed)
+
 	log.Printf("Did the signature verify? True = yes: %v", valid)
-	
+
+	log.Printf("TM blockchain address from pubkey: %v", secp256k1key.Address())
+
 	err = key.Delete()
 	require.NoError(t, err)
 }
@@ -61,8 +61,8 @@ func TestCreateKeySecp256r1(t *testing.T) {
 	require.NoError(t, err)
 	label, err := randomBytes(16)
 	require.NoError(t, err)
-	
-	key, err := kr.NewKey( KEYGEN_SECP256R1, string(label) )
+
+	key, err := kr.NewKey(KEYGEN_SECP256R1, string(label))
 	require.NoError(t, err)
 	require.NotNil(t, key)
 
@@ -71,7 +71,7 @@ func TestCreateKeySecp256r1(t *testing.T) {
 
 	log.Printf("Public: %s", pemEncodedPub)
 	//pub := key.PubKey()
-	
+
 	//log.Printf("Address: %s", string(pub.Address()))
 
 	key2 := key
@@ -81,7 +81,7 @@ func TestCreateKeySecp256r1(t *testing.T) {
 	//key3, err := kr.NewKey( KEYGEN_SECP256K1, string(label) )
 	//require.NoError(t, err)
 	//log.Printf("Keys should NOT be equal: %v", key.Equals(key3))
-	
+
 	err = key.Delete()
 	require.NoError(t, err)
 
@@ -95,5 +95,5 @@ func TestCreateKeySecp256r1(t *testing.T) {
 	// key3 delete should pass
 	//err = key3.Delete()
 	//require.NoError(t, err)
-	
+
 }
