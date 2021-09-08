@@ -1,20 +1,20 @@
 package keys
 
 import (
-	"os"
-	"log"
-	"encoding/json"
-	"crypto/rand"
 	"crypto/elliptic"
-	
+	"crypto/rand"
+	"encoding/json"
+	"log"
+	"os"
+
 	"github.com/frumioj/crypto11"
 )
 
 type Pkcs11Keyring struct {
 	ModulePath string
 	TokenLabel string
-	pin string
-	ctx *crypto11.Context
+	pin        string
+	ctx        *crypto11.Context
 }
 
 // Keyring interface provides the methods for keyring
@@ -25,8 +25,8 @@ type Pkcs11Keyring struct {
 // keyring
 // ListKeys lists all of the keys on the keyring
 type Keyring interface {
-	NewKey( algorithm KeygenAlgorithm, label string ) (CryptoKey, error)
-	Key( label string ) (CryptoKey, error)
+	NewKey(algorithm KeygenAlgorithm, label string) (CryptoKey, error)
+	Key(label string) (CryptoKey, error)
 	ListKeys() ([]CryptoKey, error)
 }
 
@@ -45,7 +45,7 @@ func (ring Pkcs11Keyring) NewKey(algorithm KeygenAlgorithm, label string) (Crypt
 	}
 
 	var key crypto11.Signer
-	
+
 	switch algorithm {
 	case KEYGEN_SECP256K1:
 		key, err = ring.ctx.GenerateECDSAKeyPairWithLabel(id, []byte(label), crypto11.P256K1())
@@ -62,27 +62,26 @@ func (ring Pkcs11Keyring) NewKey(algorithm KeygenAlgorithm, label string) (Crypt
 		log.Printf("Key made: %v", key)
 	}
 
-	
 	return CryptoKey{Label: label, Algo: algorithm, signer: key}, nil
 }
 
 func NewPkcs11FromConfig(configPath string) (Pkcs11Keyring, error) {
 
 	kr := Pkcs11Keyring{}
-	cfg, err := getConfig( configPath )
-	
+	cfg, err := getConfig(configPath)
+
 	if err != nil {
 		log.Printf("Could not create new Pkcs11 keyring: %s", err.Error())
 		return Pkcs11Keyring{}, err
 	}
 
-	kr.ctx, err = crypto11.Configure( cfg )
+	kr.ctx, err = crypto11.Configure(cfg)
 
 	if err != nil {
 		log.Printf("Slot configuration failed with %s", err.Error())
 		return Pkcs11Keyring{}, err
 	}
-	
+
 	kr.ModulePath = cfg.Path
 	kr.TokenLabel = cfg.TokenLabel
 
@@ -91,12 +90,12 @@ func NewPkcs11FromConfig(configPath string) (Pkcs11Keyring, error) {
 
 func getConfig(configLocation string) (ctx *crypto11.Config, err error) {
 	file, err := os.Open(configLocation)
-	
+
 	if err != nil {
 		log.Printf("Could not open config file: %s", configLocation)
 		return nil, err
 	}
-	
+
 	defer func() {
 		err = file.Close()
 	}()
@@ -104,16 +103,16 @@ func getConfig(configLocation string) (ctx *crypto11.Config, err error) {
 	configDecoder := json.NewDecoder(file)
 	config := &crypto11.Config{}
 	err = configDecoder.Decode(config)
-	
+
 	if err != nil {
 		log.Printf("Could not decode config file: %s", err.Error())
 		return nil, err
 	}
-	
+
 	return config, nil
 }
 
-func randomBytes( n int ) ([]byte, error) {
+func randomBytes(n int) ([]byte, error) {
 	b := make([]byte, n)
 	_, err := rand.Read(b)
 
