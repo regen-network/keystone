@@ -2,22 +2,20 @@ package keys
 
 import (
 	"bytes"
-	"log"
 	"errors"
+	"log"
 	"math/big"
-	
+
 	"crypto"
-	"crypto/rand"
-	"crypto/elliptic"
 	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/asn1"
-	
-	"github.com/frumioj/crypto11"
-	"github.com/cosmos/cosmos-sdk/crypto/types"
+
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
-
-
+	"github.com/cosmos/cosmos-sdk/crypto/types"
+	"github.com/frumioj/crypto11"
 )
 
 const (
@@ -40,7 +38,7 @@ const (
 	//SIGNING_OPTS_BC_ECDSA_SHA384
 	//SIGNING_OPTS_BC_ECDSA_SHA512
 	// just need to add the appropriate hashing into the Sign API
-	
+
 	// SIGNING_OPTS_ECDSA means
 	//   i) No hash in the signing process
 	//  ii) DER signature as in usual ECDSA
@@ -79,9 +77,11 @@ func (pk *CryptoKey) Bytes() []byte {
 	return []byte{}
 }
 
-// Sign a plaintext with this private key. Any hashing
-// required by the caller must be done prior to this call
-// or left up to the HSM PKCS11 mechanism itself.
+// Sign a plaintext with this private key. The SigningProfile tells
+// the function which way of pre- and post-encoding of the actual
+// cryptographic signature, which includes prior hashing, and whether
+// or not the signature should be DER-encoded or "raw" (two
+// concatenated big Ints)
 func (pk *CryptoKey) Sign(plaintext []byte, opts *SigningProfile) ([]byte, error) {
 
 	var digested []byte
@@ -94,14 +94,14 @@ func (pk *CryptoKey) Sign(plaintext []byte, opts *SigningProfile) ([]byte, error
 	} else {
 		digested = plaintext
 	}
-	
+
 	sigbytes, err := pk.signer.Sign(rand.Reader, digested, nil)
 
 	if err != nil {
 		log.Printf("Signature failed: %s", err.Error())
 		return nil, err
 	}
-	
+
 	// Default signature mechanism is the blockchain flavour of
 	// ECDSA (see const definitions above) which means now getting
 	// the raw signature and low-s normalizing the s component of
@@ -109,15 +109,15 @@ func (pk *CryptoKey) Sign(plaintext []byte, opts *SigningProfile) ([]byte, error
 	if opts == nil || *opts == SIGNING_OPTS_BC_ECDSA_SHA256 {
 		// un-DER the sig
 		var rawsig *dsaSignature
-		rawsig, err := unmarshalDER( sigbytes )
-		
+		rawsig, err := unmarshalDER(sigbytes)
+
 		if err != nil {
 			log.Printf("Error getting ints from DER: %s", err.Error())
 			return nil, err
 		}
 
-		return signatureRaw( rawsig.R, NormalizeS( rawsig.S )), nil
-		
+		return signatureRaw(rawsig.R, NormalizeS(rawsig.S, crypto11.P256K1())), nil
+
 	} else {
 		return sigbytes, nil
 	}
@@ -145,13 +145,13 @@ func (pk *CryptoKey) Delete() error { return pk.signer.Delete() }
 func (pk *CryptoKey) Public() crypto.PublicKey { return pk.signer.Public() }
 
 func (pk *CryptoKey) PubKeyBytes() []byte {
- 	switch pub := pk.Public().(type) {
- 	case *ecdsa.PublicKey:
+	switch pub := pk.Public().(type) {
+	case *ecdsa.PublicKey:
 		// is this OK for a *btcec* secp256k1 key?
- 		return elliptic.MarshalCompressed(pub.Curve, pub.X, pub.Y)
- 	default:
- 		panic("Unsupported public key type!")
- 	}
+		return elliptic.MarshalCompressed(pub.Curve, pub.X, pub.Y)
+	default:
+		panic("Unsupported public key type!")
+	}
 }
 
 // Address takes a PubKey, expecting that it has
@@ -203,45 +203,41 @@ type dsaSignature struct {
 // unmarshalDER takes a DER-encoded byte array, and dumps
 // it into a (hopefully-appropriate) struct. If the struct
 // given, is not appropriate for the data, then unmarshalling
-// will fail. 
+// will fail.
 func unmarshalDER(sigDER []byte) (*dsaSignature, error) {
 	var sig dsaSignature
-	
+
 	if rest, err := asn1.Unmarshal(sigDER, &sig); err != nil {
 		return nil, err
 	} else if len(rest) > 0 {
 		return nil, errors.New("unexpected data found after DSA signature")
 	}
-	
+
 	return &sig, nil
 }
 
-// p256Order returns the curve order for the secp256r1 curve
-// NOTE: this is specific to the secp256r1/P256 curve,
-// and not taken from the domain params for the key itself
-// (which would be a more generic approach for all EC).
-var p256Order = elliptic.P256().Params().N
-
-// p256HalfOrder returns half the curve order
-// a bit shift of 1 to the right (Rsh) is equivalent
-// to division by 2, only faster.
-var p256HalfOrder = new(big.Int).Rsh(p256Order, 1)
-
-// IsSNormalized returns true for the integer sigS if sigS falls in
+// isSNormalized returns true for the integer sigS if sigS falls in
 // lower half of the curve order
-func IsSNormalized(sigS *big.Int) bool {
-	return sigS.Cmp(p256HalfOrder) != 1
+// It is expected that the caller passes the curve order as a big Int along
+// with the s portion of the signature.
+func isSNormalized(sigS *big.Int, order *big.Int) bool {
+	// return the result of comparing the given s signature
+	// component with half the value of the curve order. If the s
+	// component is less than or equal to half the curve order,
+	// then returns true (!= 1), if > than, will return false
+	// (==1)
+	return sigS.Cmp(new(big.Int).Rsh(order, 1)) != 1
 }
 
 // NormalizeS will invert the s value if not already in the lower half
-// of curve order value
-func NormalizeS(sigS *big.Int) *big.Int {
-
-	if IsSNormalized(sigS) {
+// of curve order value by subtracting it from the curve order (N)
+func NormalizeS(sigS *big.Int, curve elliptic.Curve) *big.Int {
+	if isSNormalized(sigS, curve.Params().N) {
 		return sigS
+	} else {
+		order := curve.Params().N
+		return new(big.Int).Sub(order, sigS)
 	}
-
-	return new(big.Int).Sub(p256Order, sigS)
 }
 
 // signatureRaw takes two big integers and returns a byte value that
@@ -275,15 +271,15 @@ func signatureRaw(r *big.Int, s *big.Int) []byte {
 // 	return ecdsa.Verify(pubk.PublicKey.(*ecdsa.PublicKey), msg, rawsig.R, rawsig.S)
 // }
 
-func getPubKey(pk *CryptoKey) (types.PubKey) {
- 	switch pub := pk.Public().(type) {
- 	case *ecdsa.PublicKey:
+func getPubKey(pk *CryptoKey) types.PubKey {
+	switch pub := pk.Public().(type) {
+	case *ecdsa.PublicKey:
 		log.Printf("Curve: %s", pub.Curve.Params().Name)
 
 		log.Printf("Curve = p256? %v", pub.Curve == elliptic.P256())
 		// is this OK for a *btcec* secp256k1 key?
- 		return &secp256k1.PubKey{Key: elliptic.MarshalCompressed(pub.Curve, pub.X, pub.Y)}
- 	default:
- 		panic("Unsupported public key type!")
- 	}
+		return &secp256k1.PubKey{Key: elliptic.MarshalCompressed(pub.Curve, pub.X, pub.Y)}
+	default:
+		panic("Unsupported public key type!")
+	}
 }
