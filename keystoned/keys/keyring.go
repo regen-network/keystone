@@ -1,3 +1,12 @@
+// The keys package is collection of structures and functions used to
+// manipulate a "keyring" -- a collection of keys, and the keys
+// themselves. A keyring could consist of an OS directory containing
+// keys stored in files, or other implementations could be
+// imagined. In this particular case though, a concrete implementation
+// is given of a PKCS11-based keyring, which is a set of keys stored
+// on a cryptographic token, such as an HSM, which offers the PKCS11
+// API to its keys.
+
 package keys
 
 import (
@@ -27,6 +36,7 @@ type Pkcs11Keyring struct {
 type Keyring interface {
 	NewKey(algorithm KeygenAlgorithm, label string) (CryptoKey, error)
 	Key(label string) (CryptoKey, error)
+	// @@TODO - not implemented for PKCS11 keyring 9/9/2021
 	ListKeys() ([]CryptoKey, error)
 }
 
@@ -34,14 +44,14 @@ type Keyring interface {
 // using the given algorithm from the keygen algos supported. A label
 // can be passed in. This is used as a way of uniquely identifying the key
 // and typically is a large (unguessable) random number
-func (ring Pkcs11Keyring) NewKey(algorithm KeygenAlgorithm, label string) (CryptoKey, error) {
+func (ring Pkcs11Keyring) NewKey(algorithm KeygenAlgorithm, label string) (*CryptoKey, error) {
 
 	// Crypto-secure random bytes
 	id, err := randomBytes(16)
 
 	if err != nil {
 		log.Printf("Error making key ID: %s", err.Error())
-		return CryptoKey{}, err
+		return nil, err
 	}
 
 	var key crypto11.Signer
@@ -52,12 +62,12 @@ func (ring Pkcs11Keyring) NewKey(algorithm KeygenAlgorithm, label string) (Crypt
 	case KEYGEN_SECP256R1:
 		key, err = ring.ctx.GenerateECDSAKeyPairWithLabel(id, []byte(label), elliptic.P256())
 	default:
-		return CryptoKey{}, err
+		return nil, err
 	}
 
 	if err != nil {
 		log.Printf("Error generating key: %s", err.Error())
-		return CryptoKey{}, err
+		return nil, err
 	} else {
 		log.Printf("Key made: %v", key)
 	}
@@ -66,9 +76,36 @@ func (ring Pkcs11Keyring) NewKey(algorithm KeygenAlgorithm, label string) (Crypt
 	pubkey := getPubKey(&newkey)
 	newkey.pubk = pubkey
 	
-	return newkey, nil
+	return &newkey, nil
 }
 
+// Key retrieves a keypair from the PKCS11 token and populates a
+// CryptoKey object, based on finding the key[air based on the label
+// that is supplied in the API call.
+func (ring Pkcs11Keyring) Key(label string) (*CryptoKey, error) {
+	
+	// Note: this API retrieves key PAIRS, so only asymmetric key
+	// algorithms
+	keys, err := ring.ctx.FindKeyPairs(nil, []byte(label))
+
+	if err != nil {
+		log.Printf("Key could not be found, with error: %s", err.Error())
+		return nil, err
+	}
+
+	// @@TODO fill out the Algo by retrieving the key type and
+	// thus the curve name - requires some testing though
+	// to determine exactly how
+	newkey := CryptoKey{Label: label, signer: keys[0]}
+	pubkey := getPubKey(&newkey)
+	newkey.pubk = pubkey
+
+	return &newkey, nil
+}
+
+// NewPkcs11FromConfig returns a new Pkcs11Keyring structure when
+// given the path to a configuration file that describes the Pkcs11
+// token which holds the actual cryptographic keys.
 func NewPkcs11FromConfig(configPath string) (Pkcs11Keyring, error) {
 
 	kr := Pkcs11Keyring{}
@@ -92,6 +129,8 @@ func NewPkcs11FromConfig(configPath string) (Pkcs11Keyring, error) {
 	return kr, nil
 }
 
+// getConfig returns a crypto11 Config struct representing the Pkcs11
+// token, when given the location of a JSON configuration file.
 func getConfig(configLocation string) (ctx *crypto11.Config, err error) {
 	file, err := os.Open(configLocation)
 
@@ -116,6 +155,9 @@ func getConfig(configLocation string) (ctx *crypto11.Config, err error) {
 	return config, nil
 }
 
+// randomBytes returns n bytes obtained from a local source of
+// crypto-secure randomness. This can be used for generating
+// hard-to-guess key labels, for example.
 func randomBytes(n int) ([]byte, error) {
 	b := make([]byte, n)
 	_, err := rand.Read(b)
