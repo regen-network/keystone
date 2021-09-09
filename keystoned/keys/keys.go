@@ -140,6 +140,8 @@ func (pk *CryptoKey) PubKey() types.PubKey { return pk.pubk }
 
 func (pk *CryptoKey) Type() string { return "CryptoKey" }
 
+func (pk *CryptoKey) KeyType() KeygenAlgorithm { return pk.Algo }
+
 func (pk *CryptoKey) Delete() error { return pk.signer.Delete() }
 
 func (pk *CryptoKey) Public() crypto.PublicKey { return pk.signer.Public() }

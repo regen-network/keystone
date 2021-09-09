@@ -62,7 +62,11 @@ func (ring Pkcs11Keyring) NewKey(algorithm KeygenAlgorithm, label string) (Crypt
 		log.Printf("Key made: %v", key)
 	}
 
-	return CryptoKey{Label: label, Algo: algorithm, signer: key}, nil
+	newkey := CryptoKey{Label: label, Algo: algorithm, signer: key}
+	pubkey := getPubKey(&newkey)
+	newkey.pubk = pubkey
+	
+	return newkey, nil
 }
 
 func NewPkcs11FromConfig(configPath string) (Pkcs11Keyring, error) {

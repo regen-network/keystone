@@ -31,25 +31,31 @@ func TestCreateKeySecp256k1(t *testing.T) {
 
 	require.NoError(t, err)
 	log.Printf("Signed byes: %v", signed)
-	pubKey := getPubKey(&key)
-	log.Printf("Key: %v", pubKey.(*secp256k1.PubKey))
-	secp256k1key := pubKey.(*secp256k1.PubKey)
-	pub, err := btcsecp256k1.ParsePubKey(secp256k1key.Key, btcsecp256k1.S256())
 
-	if err != nil {
-		log.Printf("Not a secp256k1 key?")
+	pubkey := key.PubKey()
+
+	log.Printf("Pubkey: %v", pubkey)
+
+	require.Equal(t, key.KeyType(), KEYGEN_SECP256K1)
+	
+	if key.KeyType() == KEYGEN_SECP256K1 {
+		secp256k1key := pubkey.(*secp256k1.PubKey)
+		pub, err := btcsecp256k1.ParsePubKey(secp256k1key.Key, btcsecp256k1.S256())
+
+		if err != nil {
+			log.Printf("Not a secp256k1 key?")
+		}
+		
+		log.Printf("Pub: %v", pub)
+
+		// Validate the signature made by the HSM key, but using the
+		// BTC secp256k1 public key
+		valid := secp256k1key.VerifySignature(msg, signed)
+		log.Printf("Did the signature verify? True = yes: %v", valid)
+
+		log.Printf("TM blockchain address from pubkey: %v", secp256k1key.Address())
 	}
-
-	log.Printf("Pub: %v", pub)
-
-	// Validate the signature made by the HSM key, but using the
-	// BTC secp256k1 public key
-	valid := secp256k1key.VerifySignature(msg, signed)
-
-	log.Printf("Did the signature verify? True = yes: %v", valid)
-
-	log.Printf("TM blockchain address from pubkey: %v", secp256k1key.Address())
-
+	
 	err = key.Delete()
 	require.NoError(t, err)
 }
@@ -65,22 +71,23 @@ func TestCreateKeySecp256r1(t *testing.T) {
 	key, err := kr.NewKey(KEYGEN_SECP256R1, string(label))
 	require.NoError(t, err)
 	require.NotNil(t, key)
-
+	require.Equal(t, key.KeyType(), KEYGEN_SECP256R1)
+	
 	x509EncodedPub, _ := x509.MarshalPKIXPublicKey(key.Public())
 	pemEncodedPub := pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: x509EncodedPub})
 
 	log.Printf("Public: %s", pemEncodedPub)
-	//pub := key.PubKey()
+	pub := key.PubKey()
 
-	//log.Printf("Address: %s", string(pub.Address()))
+	log.Printf("Address: %s", string(pub.Address()))
 
 	key2 := key
 
-	//log.Printf("Keys should be equal: %v", key.Equals(key2))
+	log.Printf("Keys should be equal: %v", key.Equals(key2))
 
-	//key3, err := kr.NewKey( KEYGEN_SECP256K1, string(label) )
-	//require.NoError(t, err)
-	//log.Printf("Keys should NOT be equal: %v", key.Equals(key3))
+	key3, err := kr.NewKey( KEYGEN_SECP256K1, string(label) )
+	require.NoError(t, err)
+	log.Printf("Keys should NOT be equal: %v", key.Equals(key3))
 
 	err = key.Delete()
 	require.NoError(t, err)
@@ -93,7 +100,6 @@ func TestCreateKeySecp256r1(t *testing.T) {
 	require.Error(t, err)
 
 	// key3 delete should pass
-	//err = key3.Delete()
-	//require.NoError(t, err)
-
+	err = key3.Delete()
+	require.NoError(t, err)
 }
