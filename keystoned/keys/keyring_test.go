@@ -72,23 +72,36 @@ func TestCreateKeySecp256r1(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, key)
 	require.Equal(t, key.KeyType(), KEYGEN_SECP256R1)
-	
+
+	// Verify that I can also use this key in the X509 universe
 	x509EncodedPub, _ := x509.MarshalPKIXPublicKey(key.Public())
 	pemEncodedPub := pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: x509EncodedPub})
 
 	log.Printf("Public: %s", pemEncodedPub)
+
+	// retrieve the cosmos crypto pubkey
 	pub := key.PubKey()
 
+	// Tendermint address
 	log.Printf("Address: %s", string(pub.Address()))
 
+	// point a second key object to the same key to test equality
 	key2 := key
 
-	log.Printf("Keys should be equal: %v", key.Equals(key2))
+	log.Printf("Keys are equal (should be true)?: %v", key.Equals(*key2))
 
-	key3, err := kr.NewKey( KEYGEN_SECP256K1, string(label) )
+	label2, err := randomBytes(16)
 	require.NoError(t, err)
-	log.Printf("Keys should NOT be equal: %v", key.Equals(key3))
 
+	// Generate a completely different key
+	key3, err := kr.NewKey( KEYGEN_SECP256R1, string(label2) )
+	require.NoError(t, err)
+	log.Printf("Keys are equal (should be false)?: %v", key.Equals(*key3))
+
+	key4, err := kr.Key( string(label) )
+	require.NoError(t, err)
+
+	log.Printf("Keys are equal (should be true)?: %v", key4.Equals(*key))
 	err = key.Delete()
 	require.NoError(t, err)
 
@@ -96,10 +109,15 @@ func TestCreateKeySecp256r1(t *testing.T) {
 	// which was already deleted
 	err = key2.Delete()
 
-	// Yes, there SHOULD be an error on this delete!
+	// Yes, there SHOULD be an error on this delete
 	require.Error(t, err)
 
 	// key3 delete should pass
 	err = key3.Delete()
 	require.NoError(t, err)
+
+	// key4 should again be the same as a key already deleted, so
+	// should fail
+	err = key4.Delete()
+	require.Error(t, err)
 }
