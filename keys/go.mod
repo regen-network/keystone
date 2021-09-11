@@ -1,4 +1,4 @@
-module github.com/regen-network/keystone/keystoned/keys
+module github.com/regen-network/keystone/keys
 
 go 1.16
 
