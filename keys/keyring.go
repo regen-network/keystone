@@ -34,7 +34,7 @@ type Pkcs11Keyring struct {
 // keyring
 // ListKeys lists all of the keys on the keyring
 type Keyring interface {
-	NewKey(algorithm KeygenAlgorithm, label string) (CryptoKey, error)
+	NewKey(algorithm KeygenAlgorithm, label string) (*CryptoKey, error)
 	Key(label string) (*CryptoKey, error)
 	// @@TODO - not implemented for PKCS11 keyring 9/9/2021
 	//ListKeys() ([]CryptoKey, error)
