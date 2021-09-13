@@ -37,7 +37,7 @@ type Keyring interface {
 	NewKey(algorithm KeygenAlgorithm, label string) (CryptoKey, error)
 	Key(label string) (*CryptoKey, error)
 	// @@TODO - not implemented for PKCS11 keyring 9/9/2021
-	ListKeys() ([]CryptoKey, error)
+	//ListKeys() ([]CryptoKey, error)
 }
 
 // NewKey creates a new ECC key on a Pkcs11 token
