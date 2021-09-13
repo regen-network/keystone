@@ -10,6 +10,8 @@ import (
 	btcsecp256k1 "github.com/btcsuite/btcd/btcec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	"github.com/stretchr/testify/require"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func TestCreateKeySecp256k1(t *testing.T) {
@@ -83,7 +85,7 @@ func TestCreateKeySecp256r1(t *testing.T) {
 	pub := key.PubKey()
 
 	// Tendermint address
-	log.Printf("Address: %s", string(pub.Address()))
+	log.Printf("AccAddress: %v", sdk.AccAddress( pub.Address()))
 
 	// point a second key object to the same key to test equality
 	key2 := key
