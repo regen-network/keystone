@@ -84,6 +84,11 @@ func (pk *CryptoKey) Bytes() []byte {
 // concatenated big Ints)
 func (pk *CryptoKey) Sign(plaintext []byte, opts *SigningProfile) ([]byte, error) {
 
+	// @@TODO what if the signing profile doesn't match the type
+	// of the key - shouldn't that make an error?
+	// Who's responsibility is it to make sure key type matches
+	// signing profile
+	
 	var digested []byte
 
 	// Blockchain-flavoured ECDSA (as of 9/2021) means required
