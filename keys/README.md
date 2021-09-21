@@ -52,7 +52,7 @@ used to link public keys to their Cosmos account addresses.
     {
       "Path": "/usr/local/lib/softhsm/libsofthsm2.so",
       "TokenLabel": "The Cosmos",
-      "Pin": "5565455835367496544668"
+      "Pin": "4536645283535544718"
     }
 ```
 
