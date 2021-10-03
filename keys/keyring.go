@@ -47,7 +47,7 @@ type Keyring interface {
 func (ring Pkcs11Keyring) NewKey(algorithm KeygenAlgorithm, label string) (*CryptoKey, error) {
 
 	// Crypto-secure random bytes
-	id, err := randomBytes(16)
+	id, err := CryptoRandomBytes(16)
 
 	if err != nil {
 		log.Printf("Error making key ID: %s", err.Error())
@@ -155,10 +155,10 @@ func getConfig(configLocation string) (ctx *crypto11.Config, err error) {
 	return config, nil
 }
 
-// randomBytes returns n bytes obtained from a local source of
+// CryptoRandomBytes returns n bytes obtained from a local source of
 // crypto-secure randomness. This can be used for generating
 // hard-to-guess key labels, for example.
-func randomBytes(n int) ([]byte, error) {
+func CryptoRandomBytes(n int) ([]byte, error) {
 	b := make([]byte, n)
 	_, err := rand.Read(b)
 
