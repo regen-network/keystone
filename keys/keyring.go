@@ -47,7 +47,7 @@ type Keyring interface {
 func (ring Pkcs11Keyring) NewKey(algorithm KeygenAlgorithm, label string) (*CryptoKey, error) {
 
 	// Crypto-secure random bytes
-	id, err := randomBytes(16)
+	id, err := CryptoRandomBytes(16)
 
 	if err != nil {
 		log.Printf("Error making key ID: %s", err.Error())
@@ -106,27 +106,27 @@ func (ring Pkcs11Keyring) Key(label string) (*CryptoKey, error) {
 // NewPkcs11FromConfig returns a new Pkcs11Keyring structure when
 // given the path to a configuration file that describes the Pkcs11
 // token which holds the actual cryptographic keys.
-func NewPkcs11FromConfig(configPath string) (Pkcs11Keyring, error) {
+func NewPkcs11FromConfig(configPath string) (*Pkcs11Keyring, error) {
 
 	kr := Pkcs11Keyring{}
 	cfg, err := getConfig(configPath)
 
 	if err != nil {
 		log.Printf("Could not create new Pkcs11 keyring: %s", err.Error())
-		return Pkcs11Keyring{}, err
+		return nil, err
 	}
 
 	kr.ctx, err = crypto11.Configure(cfg)
 
 	if err != nil {
 		log.Printf("Slot configuration failed with %s", err.Error())
-		return Pkcs11Keyring{}, err
+		return nil, err
 	}
 
 	kr.ModulePath = cfg.Path
 	kr.TokenLabel = cfg.TokenLabel
 
-	return kr, nil
+	return &kr, nil
 }
 
 // getConfig returns a crypto11 Config struct representing the Pkcs11
@@ -155,10 +155,10 @@ func getConfig(configLocation string) (ctx *crypto11.Config, err error) {
 	return config, nil
 }
 
-// randomBytes returns n bytes obtained from a local source of
+// CryptoRandomBytes returns n bytes obtained from a local source of
 // crypto-secure randomness. This can be used for generating
 // hard-to-guess key labels, for example.
-func randomBytes(n int) ([]byte, error) {
+func CryptoRandomBytes(n int) ([]byte, error) {
 	b := make([]byte, n)
 	_, err := rand.Read(b)
 

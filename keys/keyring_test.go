@@ -10,6 +10,8 @@ import (
 	btcsecp256k1 "github.com/btcsuite/btcd/btcec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	"github.com/stretchr/testify/require"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func TestCreateKeySecp256k1(t *testing.T) {
@@ -19,7 +21,7 @@ func TestCreateKeySecp256k1(t *testing.T) {
 	// JSON
 	kr, err := NewPkcs11FromConfig("./pkcs11-config")
 	require.NoError(t, err)
-	label, err := randomBytes(16)
+	label, err := CryptoRandomBytes(16)
 	require.NoError(t, err)
 
 	key, err := kr.NewKey(KEYGEN_SECP256K1, string(label))
@@ -65,7 +67,7 @@ func TestCreateKeySecp256r1(t *testing.T) {
 	// hardcoded path for now - might change this API to actually take a JSON string and let caller decide how to get that JSON
 	kr, err := NewPkcs11FromConfig("./pkcs11-config")
 	require.NoError(t, err)
-	label, err := randomBytes(16)
+	label, err := CryptoRandomBytes(16)
 	require.NoError(t, err)
 
 	key, err := kr.NewKey(KEYGEN_SECP256R1, string(label))
@@ -83,14 +85,14 @@ func TestCreateKeySecp256r1(t *testing.T) {
 	pub := key.PubKey()
 
 	// Tendermint address
-	log.Printf("Address: %s", string(pub.Address()))
+	log.Printf("AccAddress: %v", sdk.AccAddress( pub.Address()))
 
 	// point a second key object to the same key to test equality
 	key2 := key
 
 	log.Printf("Keys are equal (should be true)?: %v", key.Equals(*key2))
 
-	label2, err := randomBytes(16)
+	label2, err := CryptoRandomBytes(16)
 	require.NoError(t, err)
 
 	// Generate a completely different key
