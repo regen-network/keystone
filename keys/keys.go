@@ -154,49 +154,13 @@ func (pk *CryptoKey) Public() crypto.PublicKey { return pk.signer.Public() }
 func (pk *CryptoKey) PubKeyBytes() []byte {
 	switch pub := pk.Public().(type) {
 	case *ecdsa.PublicKey:
+		// @@TODO: check the curve params for which curve it is first (although outcome is same for both k1 and r1)
 		// is this OK for a *btcec* secp256k1 key?
 		return elliptic.MarshalCompressed(pub.Curve, pub.X, pub.Y)
 	default:
 		panic("Unsupported public key type!")
 	}
 }
-
-// Address takes a PubKey, expecting that it has
-// a crypto.PublicKey base struct, marshals the struct into bytes using
-// ANSI X.
-// func (pubKey *PubKey) Address() tmcrypto.Address {
-
-// 	if pubKey.address == nil {
-// 		switch pub := pubKey.PublicKey.(type) {
-// 		case *ecdsa.PublicKey:
-// 			// @@ TODO: currently does the btc secp256k1 transform
-// 			// but should also support r1, by looking first at
-// 			// curve params - switch inside a switch
-// 			publicKeyBytes := pubKey.Bytes()
-// 			sha := sha256.Sum256(publicKeyBytes)
-// 			hasherRIPEMD160 := ripemd160.New()
-// 			hasherRIPEMD160.Write(sha[:]) // does not error
-// 			pubKey.address = tmcrypto.Address(hasherRIPEMD160.Sum(nil))
-// 			return pubKey.address
-// 		default:
-// 			log.Printf("Type: %T", pub)
-// 			panic("Unsupported public key!")
-// 		}
-// 	} else {
-// 		return pubKey.address
-// 	}
-
-// }
-
-// Equals checks whether two PubKeys are equal -
-// by checking their marshalled byte values
-// func (pubk *PubKey) Equals(other cryptotypes.PubKey) bool {
-
-// 	this := pubk.Bytes()
-// 	that := other.Bytes()
-
-// 	return bytes.Equal(this, that)
-// }
 
 // dsaSignature contains the two integers needed for
 // an ECDSA signature value. They must be put in a struct
@@ -261,29 +225,10 @@ func signatureRaw(r *big.Int, s *big.Int) []byte {
 	return sigBytes
 }
 
-// VerifySignature takes a plaintext msg and the signed plaintext
-// which should be a DER-encoded byte array which can be marshalled
-// into two big Ints - r and s, which represent an ECDSA signature.
-// @@TODO: what if the signature is EDDSA or some other non-ECDSA
-// option that doesn't marshal to r and s?
-// func (pubk *PubKey) VerifySignature(msg []byte, sig []byte) bool {
-
-// 	rawsig, err := unmarshalDER(sig)
-
-// 	if err != nil {
-// 		log.Printf("Signature verification failed DER decode with: %s", err.Error())
-// 		return false
-// 	}
-
-// 	return ecdsa.Verify(pubk.PublicKey.(*ecdsa.PublicKey), msg, rawsig.R, rawsig.S)
-// }
-
 func getPubKey(pk *CryptoKey) types.PubKey {
 	switch pub := pk.Public().(type) {
 	case *ecdsa.PublicKey:
-		log.Printf("Curve: %s", pub.Curve.Params().Name)
-
-		log.Printf("Curve = p256? %v", pub.Curve == elliptic.P256())
+		//@@TODO: check curve params to determine what to do here (result will be the same for r1 and k1)
 		// is this OK for a *btcec* secp256k1 key?
 		return &secp256k1.PubKey{Key: elliptic.MarshalCompressed(pub.Curve, pub.X, pub.Y)}
 	default:
