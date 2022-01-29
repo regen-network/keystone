@@ -7,10 +7,10 @@ build: proto *.go
 install: ./keystoned
 	cp keystoned $(INSTALL_DIR)
 
-proto: proto/keystone.pb.go
+proto: proto/keystone.pb.go proto/keystone_grpc.pb.go
 
 proto/keystone.pb.go: proto/keystone.proto
-	protoc --go_out=plugins=grpc:. ./proto/*.proto
+	protoc --go_out=. --go-grpc_out=. ./proto/*.proto
 
 clean:
 	rm -rf proto/*.pb.go
