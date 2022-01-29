@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package keystone;
+option go_package = "./proto";
+
+// keygenAlgorithm is the algorithm that should be used
+// for generating a key - typically the EC curve in use
+// that the key is related to.
+enum keygenAlgorithm {
+  KEYGEN_SECP256K1 = 0 ;
+  KEYGEN_SECP256R1 = 1 ;
+  KEYGEN_ED25519   = 2 ;
+}
+
+enum signingProfile {
+  // ECDSA signing, SHA256 prior to signature, low-s normalization,
+  // and raw r, s values instead of ASN
+  PROFILE_BC_ECDSA_SHA256 = 0 ;
+
+  // ECDSA signing, SHA512 prior to signature, low-s normalization,
+  // and raw r, s values instead of ASN  
+  PROFILE_BC_ECDSA_SHA512 = 1 ;
+
+  // ECDSA signing, SHA256 prior to signature, no normalization, and
+  // standard ASN1 encoding
+  PROFILE_ECDSA_SHA256 =    2 ;
+
+  // ECDSA signing, caller is expected to hash (or not), standard ASN1
+  // encoding
+  PROFILE_ECDSA_NOHASH =    3 ;
+}
+
+message keySpec {
+  string           label = 1 ;
+  sfixed32         size = 2 ;
+  keygenAlgorithm  algo = 3 ;
+}
+
+// label could be a Cosmos (group) address...
+message keyRef {
+  optional string  label = 1 ;
+}
+
+message publicKey {
+  string           label = 1 ;
+  bytes            keyBytes = 2 ;
+}
+
+message signable {
+  oneof signableUnion {
+    bytes          signableBytes = 1 ;
+    string         txref = 2 ;
+  }
+}
+
+message signed {
+  oneof signedUnion {
+    bytes          signedBytes = 1 ;
+    string         signedTxRef = 2 ;
+    int32          error = 3 ;
+  }
+}
+
+message msg {
+  keySpec          keySpec = 1 ;
+  signingProfile   signingProfile = 2 ;
+  signable         content = 3 ;
+}
+
+// Currently, a new keyring is created OOB, and is assumed to exist
+// prior to this interface being callable
+// One day, that might change...
+// Keyrings have a WKU (ie. a URL you call, that supports this interface)
+service keyring {
+  rpc newKey(keySpec)                         returns (keyRef) {} ;
+  rpc key(keySpec)                            returns (keyRef) {} ;
+  rpc pubkey(keySpec)                         returns (publicKey) {} ;
+  rpc sign(msg) returns (signed) {} ;
+}
