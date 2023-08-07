@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package regen.keystone.v1alpha1;
+
+option go_package = "github.com/regen-network/keystone/support-service";
+
+service NetworkService {
+    rpc List (NetworkServiceListRequest) returns (NetworkServiceListResponse);
+}
+
+message NetworkServiceListRequest { }
+
+message NetworkServiceListResponse {
+    repeated NetworkInfo networks = 1;
+}
+
+message NetworkInfo {
+    string chain_id = 1;
+    string display_name = 2;
+    string tendermint_rpc_url = 3;
+    string grpc_url = 4;
+}
+
+
